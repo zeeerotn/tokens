@@ -1,4 +1,4 @@
-# Commons Library
+# Tokens Library
 
 A TypeScript utility library providing common functions, type guards, validators, decorators, and entity management tools.
 
@@ -14,9 +14,7 @@ A TypeScript utility library providing common functions, type guards, validators
 ## Installation
 
 ```bash
-npm install @zxxro/commons
-# or
-yarn add @zxxro/commons
+dx install @zeeerotn/tokens
 ```
 
 ## Features
@@ -43,7 +41,7 @@ src/
 ### Type Guards
 
 ```typescript
-import { isString, isNumber, isArray } from '@zxxro/commons/common/guards';
+import { isString, isNumber, isArray } from '@zeeerotn/tokens/common/guards';
 
 const value = "test";
 if (isString(value)) {
@@ -54,7 +52,7 @@ if (isString(value)) {
 ### Entity Management
 
 ```typescript
-import { Entity } from '@zxxro/commons/entity/services';
+import { Entity } from '@zeeerotn/tokens/entity/services';
 
 class User extends Entity {
     firstName: string;
@@ -65,7 +63,7 @@ class User extends Entity {
 ### Validation
 
 ```typescript
-import { Integer, Required } from '@zxxro/commons/validator/validations';
+import { Integer, Required } from '@zeeerotn/tokens/validator/validations';
 
 class UserValidator {
     @Integer()
@@ -79,7 +77,7 @@ class UserValidator {
 ### Decorators
 
 ```typescript
-import { Debug, Singleton } from '@zxxxro/commons/common/annotations';
+import { Debug, Singleton } from '@zxxxro/tokens/common/annotations';
 
 @Singleton()
 @Debug()

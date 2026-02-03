@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: '2.5'
+          deno-version: '2.6'
           cache: true
 
       - name: Run Deno tests
@@ -33,4 +33,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Publish package
-        run: npx jsr publish
+        run: dx jsr publish
