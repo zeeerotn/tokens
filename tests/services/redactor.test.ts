@@ -302,8 +302,9 @@ describe('Redactor', () => {
       const redactor = new Redactor([
         {
           paths: [
-            'attributes.data.*.password',  // Matches data[0].user.password, data[0].admin.password, data[1][0].password
-            'attributes.data.*.deep.*.password'  // Matches data[2].nested.deep[0].password
+            '*.password',
+            'attributes.data.*.email',
+            'attributes.data.*.more.*.test'
           ],
           action: 'mask',
           replacement: '[HIDDEN]'
@@ -332,7 +333,16 @@ describe('Redactor', () => {
               nested: {
                 deep: [
                   { password: 'secret4' }
-                ]
+                ],
+                more: {
+                  ahahah: {
+                    test: 'should be hidden',
+                    info: 'should stay'
+                  },
+                  test: {
+                    notAnError: 'should stay'
+                  }
+                }
               }
             }
           ]
@@ -348,10 +358,17 @@ describe('Redactor', () => {
 
       // Nested array within array
       expect((redacted.attributes?.data as any)[1][0].password).toBe('[HIDDEN]');
-      expect((redacted.attributes?.data as any)[1][0].email).toBe('test@example.com');
+      expect((redacted.attributes?.data as any)[1][0].email).toBe('[HIDDEN]');
 
       // Deeply nested
       expect((redacted.attributes?.data as any)[2].nested.deep[0].password).toBe('[HIDDEN]');
+      
+      // Check that 'test' property inside 'more.ahahah' is redacted
+      expect((redacted.attributes?.data as any)[2].nested.more.ahahah.test).toBe('[HIDDEN]');
+      
+      // Check that properties that should NOT be redacted remain unchanged
+      expect((redacted.attributes?.data as any)[2].nested.more.ahahah.info).toBe('should stay');
+      expect((redacted.attributes?.data as any)[2].nested.more.test.notAnError).toBe('should stay');
     });
 
     it('should handle arrays at any level without explicit [] in path', () => {

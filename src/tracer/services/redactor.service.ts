@@ -66,12 +66,15 @@ export class Redactor implements RedactorInterface {
     const isLast = index === parts.length - 1;
 
     if (part === '*') {
-      const nextPart = parts[index + 1];
-      for (const key of Object.keys(obj)) {
-        if (key === nextPart && index + 1 === parts.length - 1) {
-          this.redactValue(obj, key, rule);
-        } else {
-          this.traverseAndRedact(obj[key], parts, index + 1, rule);
+      const nextIndex = index + 1;
+      const isNextLast = nextIndex === parts.length - 1;
+      
+      if (isNextLast) {
+        const targetKey = parts[nextIndex];
+        this.recursiveSearch(obj, targetKey, rule);
+      } else {
+        for (const key of Object.keys(obj)) {
+          this.traverseAndRedact(obj[key], parts, nextIndex, rule);
         }
       }
       return;
@@ -81,20 +84,42 @@ export class Redactor implements RedactorInterface {
       this.redactValue(obj, part, rule);
     } else {
       if (part in obj) {
-        const nextValue = obj[part];
-        if (Array.isArray(nextValue)) {
-          for (const item of nextValue) {
-            this.traverseAndRedact(item, parts, index + 1, rule);
-          }
-        } else {
-          this.traverseAndRedact(nextValue, parts, index + 1, rule);
-        }
+        this.traverseAndRedact(obj[part], parts, index + 1, rule);
       }
+    }
+  }
+
+  private recursiveSearch(obj: any, targetKey: string, rule: RedactionRule): void {
+    if (obj === null || obj === undefined) {
+      return;
+    }
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        this.recursiveSearch(item, targetKey, rule);
+      }
+      return;
+    }
+
+    if (typeof obj !== 'object') {
+      return;
+    }
+
+    for (const key of Object.keys(obj)) {
+      if (key === targetKey) {
+        this.redactValue(obj, key, rule);
+      }
+      this.recursiveSearch(obj[key], targetKey, rule);
     }
   }
 
   private redactValue(obj: any, key: string, rule: RedactionRule): void {
     if (obj === null || typeof obj !== 'object' || !(key in obj)) {
+      return;
+    }
+
+    const value = obj[key];
+    if (typeof value === 'object' && value !== null) {
       return;
     }
 
