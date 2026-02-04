@@ -7,7 +7,10 @@ import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
 import QueueService from '~/common/services/queue.service.ts';
 import SilentTransport from '../transports/silent.transport.ts';
 
-const silentTransport = new SilentTransport({ pretty: false, log: true });
+const noopRedactor = {
+  redact: (trace: TraceType) => trace
+};
+const silentTransport = new SilentTransport(noopRedactor, { pretty: false, log: true });
 
 const emptyQueue = new QueueService<TraceType, TransportInterface>({
   processors: [],

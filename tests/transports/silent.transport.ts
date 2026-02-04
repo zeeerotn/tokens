@@ -1,8 +1,9 @@
 import type { TraceType, TransportOptionsType } from '~/tracer/types.ts';
-import type { TransportInterface } from '~/tracer/interfaces.ts';
+import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
 
 export class SilentTransport implements TransportInterface {
-  constructor(public options: TransportOptionsType) {}
+
+  constructor(public redactor: RedactorInterface, public options?: TransportOptionsType) { }
 
   public send(data: TraceType | TraceType[]): Promise<void> {
     const traces = Array.isArray(data) ? data : [data];
@@ -15,7 +16,7 @@ export class SilentTransport implements TransportInterface {
         filteredEntries = filteredEntries.filter(entry => entry.type !== 'log');
       } else if (Array.isArray(this.options?.log)) {
         filteredEntries = filteredEntries.filter(entry => 
-          entry.type !== 'log' || (this.options.log as any[]).includes(entry.level)
+          entry.type !== 'log' || (this.options!.log as any[]).includes(entry.level)
         );
       }
       

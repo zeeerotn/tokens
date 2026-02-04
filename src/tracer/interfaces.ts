@@ -6,7 +6,12 @@ import type {
 } from '~/tracer/types.ts';
 import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
 
+export interface RedactorInterface {
+  redact(trace: TraceType): TraceType;
+}
+
 export interface TransportInterface {
+  redactor: RedactorInterface
   options?: TransportOptionsType
   send(data: TraceType | TraceType[]): Promise<void>;
 }

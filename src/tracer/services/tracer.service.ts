@@ -34,7 +34,6 @@ export class Tracer implements TracerInterface {
       traceId: options.traceId || this.trace.id,
       parentId: this.trace.spanId,
       namespaces: options.namespaces || this.options.namespaces,
-      redactKeys: options.redactKeys || this.options.redactKeys,
       useWorker: options.useWorker ?? this.options.useWorker,
     });
     

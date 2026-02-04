@@ -14,6 +14,7 @@ import Metadata from '~/common/services/metadata.service.ts';
 import Objector from '~/common/services/objector.service.ts';
 import Packer from '~/packer/services/packer.service.ts';
 import Queue from '~/common/services/queue.service.ts';
+import Redactor from '~/tracer/services/redactor.service.ts';
 import Text from '~/common/services/text.service.ts';
 import Timer from '~/common/services/timer.service.ts';
 import Tracer from '~/tracer/services/tracer.service.ts';
@@ -35,6 +36,7 @@ export { default as Metadata } from '~/common/services/metadata.service.ts';
 export { default as Objector } from '~/common/services/objector.service.ts';
 export { default as Packer } from '~/packer/services/packer.service.ts';
 export { default as Queue } from '~/common/services/queue.service.ts';
+export { default as Redactor } from '~/tracer/services/redactor.service.ts';
 export { default as Text } from '~/common/services/text.service.ts';
 export { default as Timer } from '~/common/services/timer.service.ts';
 export { default as Tracer } from '~/tracer/services/tracer.service.ts';
@@ -57,6 +59,7 @@ export default {
   Objector,
   Packer,
   Queue,
+  Redactor,
   Text,
   Timer,
   Tracer,

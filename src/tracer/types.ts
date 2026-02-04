@@ -4,6 +4,12 @@ import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
 
 export type AttributesType = Record<string, unknown>;
 
+export type RedactionRule = {
+  paths: string[];
+  action: 'mask' | 'remove' | 'hash';
+  replacement?: string;
+};
+
 export type EventType = {
   type: 'event';
   name: string;
@@ -45,7 +51,6 @@ export type TracerOptionsType = {
   traceId?: string;
   parentId?: string;
   namespaces?: Array<string>;
-  redactKeys?: Record<string, unknown>;
   useWorker?: boolean;
 };
 
@@ -53,7 +58,6 @@ export type SerializedTransportType = {
   moduleUrl: string;
   exportName: string;
   args: any[];
-  redactKeys?: Record<string, unknown>;
 };
 
 export type InitMessageType = {

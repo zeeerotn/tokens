@@ -18,7 +18,11 @@ class MockHttpTransport extends HttpTransport {
 
   constructor() {
     const controller = new AbortController();
-    super('https://example.com/v1/traces', {
+    // Create a no-op redactor for mock
+    const noopRedactor = {
+      redact: (trace: TraceType) => trace
+    };
+    super('https://example.com/v1/traces', noopRedactor, {
       headers: {
         'Authorization': 'Bearer mock-token',
         'X-Service-Name': 'test-service',
@@ -29,56 +33,15 @@ class MockHttpTransport extends HttpTransport {
 
   override async send(data: TraceType | TraceType[]): Promise<void> {
     const traces = Array.isArray(data) ? data : [data];
-    for (const trace of traces) {
+    for (let trace of traces) {
+      // Apply redaction if configured (same as parent class)
+      if (this.redactor) {
+        trace = this.redactor.redact(trace);
+      }
       this.sentData.push(trace);
       this.callCount++;
     }
     return Promise.resolve();
-  }
-
-  reset() {
-    this.sentData = [];
-    this.callCount = 0;
-  }
-}class MockRedactingTransport implements TransportInterface {
-  public sentData: Array<TraceType> = [];
-  public callCount = 0;
-  private redactKeys: Record<string, unknown>;
-
-  constructor(_useWorker: boolean, redactKeys: Record<string, unknown>) {
-    this.redactKeys = redactKeys;
-  }
-
-  public send(data: TraceType | TraceType[]): Promise<void> {
-    const traces = Array.isArray(data) ? data : [data];
-    
-    setTimeout(() => {
-      for (const trace of traces) {
-        this.processData(trace);
-      }
-    }, 0);
-    
-    return Promise.resolve();
-  }
-
-  protected async processData(data: TraceType): Promise<void> {
-    const redacted = this.applyRedaction(data);
-    this.sentData.push(redacted);
-    this.callCount++;
-  }
-
-  private applyRedaction(data: TraceType): TraceType {
-    if (!this.redactKeys || !data.attributes) return data;
-
-    const redactedAttributes: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data.attributes)) {
-      redactedAttributes[key] = key in this.redactKeys ? this.redactKeys[key] : value;
-    }
-
-    return {
-      ...data,
-      attributes: redactedAttributes,
-    };
   }
 
   reset() {
@@ -92,7 +55,11 @@ class MockConsoleTransport extends ConsoleTransport {
   public callCount = 0;
 
   constructor() {
-    super({ pretty: false });
+    // Create a no-op redactor for mock
+    const noopRedactor = {
+      redact: (trace: TraceType) => trace
+    };
+    super(noopRedactor, { pretty: false });
   }
 
   override async send(data: TraceType | TraceType[]): Promise<void> {
@@ -574,7 +541,11 @@ describe('Tracer with Console and HTTP Transports', () => {
 
   describe('Namespace Filtering', () => {
     it('should filter spans by namespace with worker transport', async () => {
+      const noopRedactor = {
+        redact: (trace: TraceType) => trace
+      };
       const silentTransport = new (await import('../transports/silent.transport.ts')).SilentTransport(
+        noopRedactor,
         { pretty: false, log: true, namespaces: ['api'] }
       );
 
@@ -592,16 +563,22 @@ describe('Tracer with Console and HTTP Transports', () => {
   });
 
   describe('Redaction', () => {
-    it('should redact sensitive data in sync mode', async () => {
-      const redactKeys = {
-        password: '***REDACTED***',
-        apiKey: '***R***',
-      };
+    it('should redact sensitive data using Redactor', async () => {
+      const { Redactor } = await import('~/tracer/services/redactor.service.ts');
+      
+      const redactor = new Redactor([
+        {
+          paths: ['attributes.password', 'attributes.apiKey'],
+          action: 'mask',
+          replacement: '***REDACTED***'
+        }
+      ]);
 
-      const mockRedactingTransport = new MockRedactingTransport(false, redactKeys);
+      const mockTransport = new MockHttpTransport();
+      mockTransport.redactor = redactor;
 
       const redactQueue = new QueueService<TraceType, TransportInterface>({
-        processors: [mockRedactingTransport],
+        processors: [mockTransport],
         intervalMs: 50,
         processorFn: (batch, processors) => {
           for (const transport of processors) {
@@ -624,11 +601,11 @@ describe('Tracer with Console and HTTP Transports', () => {
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const sentData = mockRedactingTransport.sentData[0];
+      const sentData = mockTransport.sentData[0];
       expect(sentData.attributes?.username).toBe('zeeromabs');
       expect(sentData.attributes?.email).toBe('user@example.com');
       expect(sentData.attributes?.password).toBe('***REDACTED***');
-      expect(sentData.attributes?.apiKey).toBe('***R***');
+      expect(sentData.attributes?.apiKey).toBe('***REDACTED***');
     });
   });
 

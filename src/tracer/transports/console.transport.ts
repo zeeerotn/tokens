@@ -1,5 +1,5 @@
 import type { TraceType, TransportOptionsType } from '~/tracer/types.ts';
-import type { TransportInterface } from '~/tracer/interfaces.ts';
+import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
 
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
 import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
@@ -20,12 +20,17 @@ export class ConsoleTransport implements TransportInterface {
     [SpanStatusEnum.REJECTED]: Console.red.dark,
   }
 
-  constructor(public options: TransportOptionsType) {}
+constructor(public redactor: RedactorInterface, public options: TransportOptionsType, ) {}
 
   public send(data: TraceType | TraceType[]): Promise<void> {
     const traces = Array.isArray(data) ? data : [data];
     
-    for (const trace of traces) {
+    for (let trace of traces) {
+      // Apply redaction first if configured
+      if (this.redactor) {
+        trace = this.redactor.redact(trace);
+      }
+      
       let filteredEntries = [...trace.entries];
       
       const shouldIncludeLogs = this.options?.log === undefined || this.options.log === true;

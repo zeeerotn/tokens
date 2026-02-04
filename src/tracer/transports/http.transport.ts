@@ -1,18 +1,23 @@
-import type { TransportInterface } from '~/tracer/interfaces.ts';
+import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
 import type { HttpOptionsType, TraceType, TransportOptionsType } from '~/tracer/types.ts';
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
 
 export class HttpTransport implements TransportInterface {
   public url: string;
-
-  constructor(url: string, public options?: TransportOptionsType & HttpOptionsType) {
+  
+  constructor(url: string, public redactor: RedactorInterface, public options?: TransportOptionsType & HttpOptionsType) {
     this.url = url;
   }
 
   public async send(data: TraceType | TraceType[]): Promise<void> {
     const traces = Array.isArray(data) ? data : [data];
     
-    for (const trace of traces) {
+    for (let trace of traces) {
+      // Apply redaction first if configured
+      if (this.redactor) {
+        trace = this.redactor.redact(trace);
+      }
+      
       let filteredEntries = [...trace.entries];
       
       const shouldIncludeLogs = this.options?.log === undefined || this.options.log === true;
