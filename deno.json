@@ -1,7 +1,7 @@
 {
   "name": "@zeeerotn/tokens",
-  "version": "0.6.3",
-  "license": "GPL-3.0",
+  "version": "0.6.4",
+  "license": "GPL-3.0-or-later",
   "exports": {
     ".": "./index.ts",
     "./annotations": "./annotations.ts",
