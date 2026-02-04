@@ -76,7 +76,7 @@ export class ConsoleTransport implements TransportInterface {
 
   private prettyPrint(data: TraceType): void {
     const name = data.name.toUpperCase();
-    const traceColor = this.traceColors[data.status as keyof typeof this.traceColors];
+    const traceColor = this.traceColors[data.status]
     const timestamp = this.timestampToFullDateString(data.startTime);
     const duration = Number(data.endTime ? data.endTime - data.startTime : 0).toFixed(3);
 
@@ -100,7 +100,6 @@ export class ConsoleTransport implements TransportInterface {
     for (let index = 0; index < items.length; index++) {
       const item = items[index];
       const isLast = index === items.length - 1;
-      const isError = LogLevelEnum[item.data.level] === String(LogLevelEnum.ERROR) || LogLevelEnum[item.data.level] === String(LogLevelEnum.FATAL);
       const indent = isLast ? '└─' : '├─';
       
       if (item.type === 'span') {
@@ -111,7 +110,7 @@ export class ConsoleTransport implements TransportInterface {
         log(`${Console.gray.medium}${indent} SPAN traceId ${item.data.id}${parentId} spanId ${item.data.spanId}${Console.reset}`);
       }
       
-      if (item.type === 'attrs' && !isError) {
+      if (item.type === 'attrs') {
         log(`${Console.gray.medium}${indent} WITH ${item.data}${Console.reset}`);
       }
       
