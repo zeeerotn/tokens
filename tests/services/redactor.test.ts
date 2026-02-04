@@ -298,6 +298,98 @@ describe('Redactor', () => {
   });
 
   describe('Edge Cases', () => {
+    it('should handle deeply nested arrays and objects', () => {
+      const redactor = new Redactor([
+        {
+          paths: [
+            'attributes.data.*.password',  // Matches data[0].user.password, data[0].admin.password, data[1][0].password
+            'attributes.data.*.deep.*.password'  // Matches data[2].nested.deep[0].password
+          ],
+          action: 'mask',
+          replacement: '[HIDDEN]'
+        }
+      ]);
+
+      const trace: TraceType = {
+        id: 'trace-1',
+        spanId: 'span-1',
+        name: 'test',
+        kind: SpanKindEnum.INTERNAL,
+        status: SpanStatusEnum.UNSET,
+        startTime: Date.now(),
+        entries: [],
+        attributes: {
+          data: [
+            {
+              user: { name: 'Alice', password: 'secret1' },
+              admin: { name: 'Bob', password: 'secret2' }
+            },
+            [
+              { password: 'secret3', email: 'test@example.com' },
+              { name: 'Charlie' }
+            ],
+            {
+              nested: {
+                deep: [
+                  { password: 'secret4' }
+                ]
+              }
+            }
+          ]
+        }
+      };
+
+      const redacted = redactor.redact(trace);
+
+      // Array items that are objects with password
+      expect((redacted.attributes?.data as any)[0].user.password).toBe('[HIDDEN]');
+      expect((redacted.attributes?.data as any)[0].admin.password).toBe('[HIDDEN]');
+      expect((redacted.attributes?.data as any)[0].user.name).toBe('Alice');
+
+      // Nested array within array
+      expect((redacted.attributes?.data as any)[1][0].password).toBe('[HIDDEN]');
+      expect((redacted.attributes?.data as any)[1][0].email).toBe('test@example.com');
+
+      // Deeply nested
+      expect((redacted.attributes?.data as any)[2].nested.deep[0].password).toBe('[HIDDEN]');
+    });
+
+    it('should handle arrays at any level without explicit [] in path', () => {
+      const redactor = new Redactor([
+        {
+          paths: ['attributes.items.token'],
+          action: 'remove'
+        }
+      ]);
+
+      const trace: TraceType = {
+        id: 'trace-1',
+        spanId: 'span-1',
+        name: 'test',
+        kind: SpanKindEnum.INTERNAL,
+        status: SpanStatusEnum.UNSET,
+        startTime: Date.now(),
+        entries: [],
+        attributes: {
+          items: [
+            { id: 1, token: 'token1' },
+            { id: 2, token: 'token2' },
+            [
+              { id: 3, token: 'token3' }
+            ]
+          ]
+        }
+      };
+
+      const redacted = redactor.redact(trace);
+
+      expect('token' in ((redacted.attributes?.items as any)[0] || {})).toBe(false);
+      expect('token' in ((redacted.attributes?.items as any)[1] || {})).toBe(false);
+      expect('token' in ((redacted.attributes?.items as any)[2][0] || {})).toBe(false);
+      expect((redacted.attributes?.items as any)[0].id).toBe(1);
+      expect((redacted.attributes?.items as any)[1].id).toBe(2);
+    });
+
     it('should handle missing attributes', () => {
       const redactor = new Redactor([
         {

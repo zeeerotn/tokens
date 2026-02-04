@@ -21,20 +21,18 @@ export class Redactor implements RedactorInterface {
     this.traverseAndRedact(obj, parts, 0, rule);
   }
 
-  private parsePath(path: string): Array<string | { type: 'array' | 'wildcard'; key?: string }> {
-    const segments: Array<string | { type: 'array' | 'wildcard'; key?: string }> = [];
+  private parsePath(path: string): string[] {
+    const segments: string[] = [];
     const parts = path.split('.');
     
     for (const part of parts) {
       if (part === '*') {
-        segments.push({ type: 'wildcard' });
+        segments.push('*');
       } else if (part.includes('[]')) {
-        // Handle array notation: entries[] or entries[].data becomes array marker
         const baseName = part.replace('[]', '');
         if (baseName) {
           segments.push(baseName);
         }
-        segments.push({ type: 'array' });
       } else {
         segments.push(part);
       }
@@ -45,7 +43,7 @@ export class Redactor implements RedactorInterface {
 
   private traverseAndRedact(
     obj: any,
-    parts: Array<string | { type: 'array' | 'wildcard'; key?: string }>,
+    parts: string[],
     index: number,
     rule: RedactionRule
   ): void {
@@ -53,32 +51,44 @@ export class Redactor implements RedactorInterface {
       return;
     }
 
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        this.traverseAndRedact(item, parts, index, rule);
+      }
+      return;
+    }
+
+    if (typeof obj !== 'object' || obj === null) {
+      return;
+    }
+
     const part = parts[index];
     const isLast = index === parts.length - 1;
 
-    if (typeof part === 'object' && part.type === 'wildcard') {
-      // Wildcard: traverse all keys in current object
-      if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
-        for (const key of Object.keys(obj)) {
-          if (isLast) {
-            // This shouldn't happen - wildcard should not be last
-            continue;
-          }
+    if (part === '*') {
+      const nextPart = parts[index + 1];
+      for (const key of Object.keys(obj)) {
+        if (key === nextPart && index + 1 === parts.length - 1) {
+          this.redactValue(obj, key, rule);
+        } else {
           this.traverseAndRedact(obj[key], parts, index + 1, rule);
         }
       }
-    } else if (typeof part === 'object' && part.type === 'array') {
-      // Array: iterate through all items
-      if (Array.isArray(obj)) {
-        for (const item of obj) {
-          this.traverseAndRedact(item, parts, index + 1, rule);
+      return;
+    }
+
+    if (isLast) {
+      this.redactValue(obj, part, rule);
+    } else {
+      if (part in obj) {
+        const nextValue = obj[part];
+        if (Array.isArray(nextValue)) {
+          for (const item of nextValue) {
+            this.traverseAndRedact(item, parts, index + 1, rule);
+          }
+        } else {
+          this.traverseAndRedact(nextValue, parts, index + 1, rule);
         }
-      }
-    } else if (typeof part === 'string') {
-      if (isLast) {
-        this.redactValue(obj, part, rule);
-      } else if (obj[part] !== undefined) {
-        this.traverseAndRedact(obj[part], parts, index + 1, rule);
       }
     }
   }
