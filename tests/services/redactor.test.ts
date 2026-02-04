@@ -480,5 +480,92 @@ describe('Redactor', () => {
       expect(original.attributes?.password).toBe('secret123');
       expect(redacted.attributes?.password).toBe('[REDACTED]');
     });
+
+    it('should remove functions from cloned trace', () => {
+      const redactor = new Redactor([]);
+
+      const onListen = ({ transport, hostname, port }: any) => {
+        const t = transport == 'tcp' ? 'http://' : `${transport}:`;
+        return `${t}${hostname}:${port}`;
+      };
+
+      type HttpConfig = {
+        port: number;
+        hostname: string;
+        onListen?: typeof onListen;
+      };
+
+      const original: TraceType = {
+        id: 'trace-1',
+        spanId: 'span-1',
+        name: 'test',
+        kind: SpanKindEnum.INTERNAL,
+        status: SpanStatusEnum.UNSET,
+        startTime: Date.now(),
+        entries: [],
+        attributes: {
+          http: {
+            port: 3000,
+            hostname: 'localhost',
+            onListen: onListen
+          }
+        }
+      };
+
+      const redacted = redactor.redact(original);
+      const redactedHttp = redacted.attributes?.http as HttpConfig | undefined;
+      const originalHttp = (original.attributes as any).http as HttpConfig;
+
+      expect(redactedHttp?.port).toBe(3000);
+      expect(redactedHttp?.hostname).toBe('localhost');
+      expect('onListen' in (redactedHttp || Object.create(null))).toBe(false);
+      expect(originalHttp.onListen).toBe(onListen);
+    });
+
+    it('should remove nested functions at multiple levels', () => {
+      const redactor = new Redactor([]);
+
+      type NestedConfig = {
+        callback?: () => void;
+        nested: {
+          data: string;
+          handler?: () => string;
+          deepNested: {
+            value: number;
+            processor?: (x: number) => number;
+          };
+        };
+      };
+
+      const trace: TraceType = {
+        id: 'trace-1',
+        spanId: 'span-1',
+        name: 'test',
+        kind: SpanKindEnum.INTERNAL,
+        status: SpanStatusEnum.UNSET,
+        startTime: Date.now(),
+        entries: [],
+        attributes: {
+          callback: () => console.log('test'),
+          nested: {
+            data: 'value',
+            handler: function() { return 'test'; },
+            deepNested: {
+              value: 42,
+              processor: (x: number) => x * 2
+            }
+          }
+        }
+      };
+
+      const redacted = redactor.redact(trace);
+      const redactedAttrs = redacted.attributes as NestedConfig | undefined;
+
+      expect('callback' in (redactedAttrs || Object.create(null))).toBe(false);
+      expect(redactedAttrs?.nested.data).toBe('value');
+      expect('handler' in (redactedAttrs?.nested || Object.create(null))).toBe(false);
+      expect(redactedAttrs?.nested.deepNested.value).toBe(42);
+      expect('processor' in (redactedAttrs?.nested.deepNested || Object.create(null))).toBe(false);
+    });
   });
 });

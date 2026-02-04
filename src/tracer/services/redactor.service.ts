@@ -5,7 +5,7 @@ export class Redactor implements RedactorInterface {
   constructor(private rules: RedactionRule[]) {}
 
   public redact(trace: TraceType): TraceType {
-    const redacted = structuredClone(trace);
+    const redacted = this.safeClone(trace);
     
     for (const rule of this.rules) {
       for (const path of rule.paths) {
@@ -14,6 +14,35 @@ export class Redactor implements RedactorInterface {
     }
     
     return redacted;
+  }
+
+  private safeClone(value: any): any {
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value === 'function') {
+      return undefined;
+    }
+
+    if (typeof value !== 'object') {
+      return value;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(item => this.safeClone(item));
+    }
+
+    const cloned: any = {};
+    for (const key in value) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        if (typeof value[key] === 'function') {
+          continue;
+        }
+        cloned[key] = this.safeClone(value[key]);
+      }
+    }
+    return cloned;
   }
 
   private applyRedaction(obj: any, path: string, rule: RedactionRule): void {
