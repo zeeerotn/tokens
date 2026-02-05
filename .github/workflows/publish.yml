@@ -32,5 +32,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: '2.6'
+          cache: true
+
       - name: Publish package
-        run: npx jsr publish
+        run: deno publish
