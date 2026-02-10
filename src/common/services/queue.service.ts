@@ -14,12 +14,16 @@ class QueueService<T, P> implements QueueInterface<T, P> {
   private processing = false;
   private flushInterval: number | null = null;
   
-  constructor(public options: QueueOptionsType<T, P>) {
+  constructor(public options: QueueOptionsType<T, P>) {}
+  
+  private startInterval(): void {
     if (this.flushInterval !== null) return;
     
     this.flushInterval = setInterval(() => {
       if (!this.processing && this.queue.length > 0) {
         this.processQueue();
+      } else if (!this.processing && this.queue.length === 0) {
+        this.stop();
       }
     }, this.options.intervalMs || 5000);
   }
@@ -27,6 +31,7 @@ class QueueService<T, P> implements QueueInterface<T, P> {
   public enqueue(item: T): void {
     if (this.options.processors.length === 0) return
     this.queue.push(item);
+    this.startInterval();
   }
 
   private processQueue(): void {
