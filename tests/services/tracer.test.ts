@@ -566,13 +566,15 @@ describe('Tracer with Console and HTTP Transports', () => {
     it('should redact sensitive data using Redactor', async () => {
       const { Redactor } = await import('~/tracer/services/redactor.service.ts');
       
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.password', 'attributes.apiKey'],
-          action: 'mask',
-          replacement: '***REDACTED***'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.password', 'attributes.apiKey'],
+            action: 'mask',
+            replacement: '***REDACTED***'
+          }
+        ]
+      });
 
       const mockTransport = new MockHttpTransport();
       mockTransport.redactor = redactor;

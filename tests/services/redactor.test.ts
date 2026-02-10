@@ -9,13 +9,15 @@ import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
 describe('Redactor', () => {
   describe('Basic Redaction', () => {
     it('should mask specific attribute fields', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.password', 'attributes.apiKey'],
-          action: 'mask',
-          replacement: '***REDACTED***'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.password', 'attributes.apiKey'],
+            action: 'mask',
+            replacement: '***REDACTED***'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -42,12 +44,14 @@ describe('Redactor', () => {
     });
 
     it('should remove specific fields', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.creditCard'],
-          action: 'remove'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.creditCard'],
+            action: 'remove'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -70,12 +74,14 @@ describe('Redactor', () => {
     });
 
     it('should hash specific fields', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.email'],
-          action: 'hash'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.email'],
+            action: 'hash'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -100,13 +106,15 @@ describe('Redactor', () => {
 
   describe('Wildcard Redaction', () => {
     it('should redact fields using top-level wildcard pattern *.password', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['*.password'],
-          action: 'mask',
-          replacement: '[SECRET]'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['*.password'],
+            action: 'mask',
+            replacement: '[SECRET]'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -130,12 +138,14 @@ describe('Redactor', () => {
     });
 
     it('should redact fields using wildcard pattern attributes.*.password', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.*.password'],
-          action: 'mask'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.*.password'],
+            action: 'mask'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -170,13 +180,15 @@ describe('Redactor', () => {
     });
 
     it('should redact multiple wildcard patterns', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.*.apiKey', 'attributes.*.secret'],
-          action: 'mask',
-          replacement: '***'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.*.apiKey', 'attributes.*.secret'],
+            action: 'mask',
+            replacement: '***'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -209,12 +221,14 @@ describe('Redactor', () => {
 
   describe('Array Entry Redaction', () => {
     it('should redact fields in entry data', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['entries[].data.password'],
-          action: 'mask'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['entries[].data.password'],
+            action: 'mask'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -255,12 +269,14 @@ describe('Redactor', () => {
     });
 
     it('should redact using wildcard in entries', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['entries[].data.*.token'],
-          action: 'remove'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['entries[].data.*.token'],
+            action: 'remove'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -299,17 +315,19 @@ describe('Redactor', () => {
 
   describe('Edge Cases', () => {
     it('should handle deeply nested arrays and objects', () => {
-      const redactor = new Redactor([
-        {
-          paths: [
-            '*.password',
-            'attributes.data.*.email',
-            'attributes.data.*.more.*.test'
-          ],
-          action: 'mask',
-          replacement: '[HIDDEN]'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: [
+              '*.password',
+              'attributes.data.*.email',
+              'attributes.data.*.more.*.test'
+            ],
+            action: 'mask',
+            replacement: '[HIDDEN]'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -372,12 +390,14 @@ describe('Redactor', () => {
     });
 
     it('should handle arrays at any level without explicit [] in path', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.items.token'],
-          action: 'remove'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.items.token'],
+            action: 'remove'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -408,12 +428,14 @@ describe('Redactor', () => {
     });
 
     it('should handle missing attributes', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.password'],
-          action: 'mask'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.password'],
+            action: 'mask'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -430,12 +452,14 @@ describe('Redactor', () => {
     });
 
     it('should handle non-existent paths', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.nonexistent.field'],
-          action: 'mask'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.nonexistent.field'],
+            action: 'mask'
+          }
+        ]
+      });
 
       const trace: TraceType = {
         id: 'trace-1',
@@ -455,12 +479,14 @@ describe('Redactor', () => {
     });
 
     it('should not mutate original trace', () => {
-      const redactor = new Redactor([
-        {
-          paths: ['attributes.password'],
-          action: 'mask'
-        }
-      ]);
+      const redactor = new Redactor({
+        rules: [
+          {
+            paths: ['attributes.password'],
+            action: 'mask'
+          }
+        ]
+      });
 
       const original: TraceType = {
         id: 'trace-1',
@@ -482,7 +508,7 @@ describe('Redactor', () => {
     });
 
     it('should remove functions from cloned trace', () => {
-      const redactor = new Redactor([]);
+      const redactor = new Redactor({ rules: [] });
 
       const onListen = ({ transport, hostname, port }: any) => {
         const t = transport == 'tcp' ? 'http://' : `${transport}:`;
@@ -523,7 +549,7 @@ describe('Redactor', () => {
     });
 
     it('should remove nested functions at multiple levels', () => {
-      const redactor = new Redactor([]);
+      const redactor = new Redactor({ rules: [] });
 
       type NestedConfig = {
         callback?: () => void;
