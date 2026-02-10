@@ -10,6 +10,10 @@ export type RedactionRule = {
   replacement?: string;
 };
 
+export type RedactorOptionsType = {
+  rules: RedactionRule[];
+};
+
 export type EventType = {
   type: 'event';
   name: string;

@@ -1,3 +1,4 @@
+import type { QueueInterface } from '~/common/interfaces.ts';
 import type { TracerInterface, TransportInterface } from '~/tracer/interfaces.ts';
 import type {
   AttributesType,
@@ -5,16 +6,16 @@ import type {
   TraceType,
 } from '~/tracer/types.ts';
 
+
 import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
 import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
 import Generator from '~/tracer/services/generator.service.ts';
-import QueueService from '~/common/services/queue.service.ts';
 
 export class Tracer implements TracerInterface {
   public trace: TraceType;
 
-  constructor(public queue: QueueService<TraceType, TransportInterface>, public options: TracerOptionsType) {
+  constructor(public queue: QueueInterface<TraceType, TransportInterface>, public options: TracerOptionsType) {
     this.trace = {
       id: options.traceId || Generator.randomId(16),
       spanId: Generator.randomId(8),
