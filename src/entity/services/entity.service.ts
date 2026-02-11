@@ -64,7 +64,7 @@ export class Entity implements EntityInterface {
       }
     }
 
-    return await Validator.validateValue(value, validations);
+    return await Validator.validateValue(value, this, validations);
   }
 
   public validateProperties(onlyResultWithKeys?: Array<ValidationEnum>): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined> {

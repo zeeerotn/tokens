@@ -23,7 +23,7 @@ describe('validator', () => {
     
     const validations = [new RequiredValidation()];
 
-    const result = await Validator.validateValue(userEntity.lastName, validations);
+    const result = await Validator.validateValue(userEntity.lastName, userEntity, validations);
 
     expect(result[0].key).toBe(ValidationEnum.INVALID);
   });

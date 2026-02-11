@@ -16,7 +16,7 @@ describe('integer validation', () => {
 
   const validate = async (value: any) => {
     const validation = [new Integer()];
-    return (await Validator.validateValue(value, validation))[0].key;
+    return (await Validator.validateValue(value, undefined, validation))[0].key;
   };
 
   it('string', async () => {

@@ -16,7 +16,7 @@ describe('float validation', () => {
 
   const validate = async (value: any) => {
     const validation = [new Float()];
-    return (await Validator.validateValue(value, validation))[0].key;
+    return (await Validator.validateValue(value, undefined, validation))[0].key;
   };
 
   it('string', async () => {
