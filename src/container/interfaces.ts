@@ -13,7 +13,7 @@ export interface ContainerInterface {
   add(artifacts: Array<ProviderType>, type: 'provider'): void;
   add(artifacts: Array<ConsumerType> | Array<ProviderType>, type: 'consumer' | 'provider'): void;
   construct<T>(key: KeyableType, scope?: ScopeEnum): T | undefined;
-  duplicate(): ContainerInterface;
+  duplicate(withInstances?: Map<KeyableType, any>): ContainerInterface;
   
   [Symbol.dispose](): void;
 }
