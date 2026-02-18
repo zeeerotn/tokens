@@ -25,8 +25,12 @@ export class Container implements ContainerInterface {
     this.addConsumers(artifacts?.consumers);
   }
 
-  public duplicate(): ContainerInterface {
-    return new Container({}, new Map(this.collection), new Map(this.injection));
+  public duplicate(withInstances?: Map<KeyableType, any>): ContainerInterface {
+    const newContainer = new Container({}, new Map(this.collection), new Map(this.injection));
+    if (withInstances) {
+      newContainer.instances = new Map(withInstances);
+    }
+    return newContainer;
   }
 
   public construct<T>(key: KeyableType, scope: ScopeEnum = ScopeEnum.Default): T | undefined {
