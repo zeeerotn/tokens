@@ -1,6 +1,6 @@
-import type { DispatcherInterface } from '~/emitter/interfaces.ts';
+import type { DispatchInterface } from '~/dispatcher/interfaces.ts';
 
-export class Dispatcher<T> implements DispatcherInterface<T> {
+export class Dispatch<T> implements DispatchInterface<T> {
   public listeners: {
     [K in keyof T]?: Array<(...args: T[K] extends any[] ? T[K] : [T[K]]) => void>;
   } = {};
@@ -35,4 +35,4 @@ export class Dispatcher<T> implements DispatcherInterface<T> {
   }
 }
 
-export default Dispatcher
+export default Dispatch

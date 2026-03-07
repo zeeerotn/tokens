@@ -12,6 +12,8 @@ export type ValidationType = {
   parameters?: any[];
 };
 
+export type OnValidationResultType = { key: ValidationEnum, name?: string };
+
 /**
  * The result of the validation
  * 

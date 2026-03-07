@@ -32,7 +32,7 @@ export class Entity implements EntityInterface {
     return Objector.getPropertyType(this, propertyKey)
   }
 
-  public async validateProperty<K extends keyof OmitType<this, FunctionType>>(propertyKey: K): Promise<Array<ValidationResultType> | any> {
+  public async validateProperty<K extends keyof OmitType<this, FunctionType>>(propertyKey: K, onlyResultWithKeys?: Array<ValidationEnum>, entity: EntityInterface = this): Promise<Array<ValidationResultType> | any> {
     const decorations = DecoratorMetadata.filterByTargetPropertyKeys(this, [propertyKey])
 
     const validations = decorations.reduce((previous: (ValidationInterface & AnnotationInterface)[], current) => {
@@ -45,14 +45,14 @@ export class Entity implements EntityInterface {
     const value = this[propertyKey];
 
     if (isEntity(value)) {
-      return await value.validateProperties();
+      return await value.validateProperties(onlyResultWithKeys, entity);
     }
 
     if (Array.isArray(value)) {
       const arrayValidations = await Promise.all(
         value.map(async (item) => {
           if (isEntity(item)) {
-            return await item.validateProperties();
+            return await item.validateProperties(onlyResultWithKeys, entity);
           }
           return undefined;
         })
@@ -67,12 +67,12 @@ export class Entity implements EntityInterface {
     return await Validator.validateValue(value, this, validations);
   }
 
-  public validateProperties(onlyResultWithKeys?: Array<ValidationEnum>): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined> {
+  public validateProperties(onlyResultWithKeys?: Array<ValidationEnum>, entity: EntityInterface = this): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined> {
     const promises = [];
 
     for (const key of this.getPropertyKeys()) {
       promises.push(
-        this.validateProperty(key)
+        this.validateProperty(key, onlyResultWithKeys, entity)
           .then((validations: any) => {
             if (validations && typeof validations === 'object' && !Array.isArray(validations)) {
               return { key, validations };

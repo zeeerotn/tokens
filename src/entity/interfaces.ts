@@ -27,8 +27,8 @@ export interface EntityInterface {
   getPropertyKeys<K extends keyof OmitType<this, FunctionType>>(): K[];
   getPropertyType<K extends keyof OmitType<this, FunctionType>>(propertyKey: K): string;
 
-  validateProperty<K extends keyof OmitType<this, FunctionType>>(propertyKey: K): Promise<Array<ValidationResultType> | any>;
-  validateProperties(onlyResultWithKeys?: Array<ValidationEnum>): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined>
+  validateProperty<K extends keyof OmitType<this, FunctionType>>(propertyKey: K, onlyResultWithKeys?: Array<ValidationEnum>, entity?: EntityInterface): Promise<Array<ValidationResultType> | any>;
+  validateProperties(onlyResultWithKeys?: Array<ValidationEnum>, entity?: EntityInterface): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined>
 }
 
 export default {};

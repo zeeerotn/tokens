@@ -1,6 +1,6 @@
 import type { AcceptType } from '~/common/types.ts';
 
-import ValidationEnum from '~/validator/enums/validation.enum.ts';
+import { OnValidationResultType } from './types.ts';
 
 /**
  * Validate a value and type
@@ -14,7 +14,7 @@ import ValidationEnum from '~/validator/enums/validation.enum.ts';
 export interface ValidationInterface {
   accepts?: Array<AcceptType>;
   validations?: Array<(...args: any[]) => boolean>
-  onValidation(record: any, ...parameters: any[]): Promise<ValidationEnum>;
+  onValidation(record: any, ...parameters: any[]): Promise<OnValidationResultType>;
 }
 
 export default {};

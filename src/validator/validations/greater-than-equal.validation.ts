@@ -2,6 +2,7 @@ import type { AnnotationInterface } from '~/decorator/interfaces.ts';
 import type { ValidationInterface } from '~/validator/interfaces.ts';
 import type { AcceptType, ArtifactType } from '~/common/types.ts';
 import type { DecoratorType } from '~/decorator/types.ts';
+import type { OnValidationResultType } from '~/validator/types.ts';
 
 import ValidationEnum from '~/validator/enums/validation.enum.ts';
 
@@ -41,12 +42,12 @@ export class GreaterThanEqualValidation implements AnnotationInterface, Validati
   
   onInitialize(_artifact: ArtifactType, _decorator: DecoratorType) { }
   
-  onValidation(record: any): Promise<ValidationEnum> {
+  onValidation(record: any): Promise<OnValidationResultType> {
     if (this.validations?.some(v => v(record, this.comparison) == true)) { 
-      return Promise.resolve(ValidationEnum.VALID)
+      return Promise.resolve({ key: ValidationEnum.VALID });
     }
 
-    return Promise.resolve(ValidationEnum.INVALID)
+    return Promise.resolve({ key: ValidationEnum.INVALID });
   }
 }
 

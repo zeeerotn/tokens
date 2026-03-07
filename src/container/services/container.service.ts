@@ -34,28 +34,31 @@ export class Container implements ContainerInterface {
   }
 
   public construct<T>(key: KeyableType, scope: ScopeEnum = ScopeEnum.Default): T | undefined {
-    const item = this.collection.get(key);
-
-    if (!item) return undefined;
-
-    let target = item.artifact.target;
-    if (isClass(target)) {
-      if (item.tags.includes('C')) {
-        target = this.createProxy(item.artifact, this);
-      }
-
-      if (scope == ScopeEnum.Transient) {
-        return Factory.construct(target) as T | undefined;
-      }
-
-      if (!this.instances.has(item.artifact.name)) {
-        this.instances.set(item.artifact.name, Factory.construct(target));
-      }
-
-      return this.instances.get(item.artifact.name);
+    let instance: T | undefined
+    if (scope == ScopeEnum.Default) {
+      instance = this.instances.get(key);
     }
 
-    return target as T;
+    if (!instance && this.collection.has(key)) {
+      const item = this.collection.get(key)!;
+      
+      let target = item.artifact.target;
+      
+      instance = target;
+
+      if (isClass(target)) {
+        if (item.tags.includes('C')) {
+          // @TODO Need to check if its not already applyed, as this is a ref mem
+          target = this.createProxy(item.artifact, this);
+        }
+
+        instance = Factory.construct(target);
+
+        this.instances.set(key, instance);
+      }
+    }
+
+    return instance;
   }
 
   public add(artifacts: Array<ConsumerType>, type: 'consumer'): void;

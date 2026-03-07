@@ -1,5 +1,5 @@
 
-export interface DispatcherInterface<T>  {
+export interface DispatchInterface<T>  {
   listeners: {
     [K in keyof T]?: Array<(...args: T[K] extends any[] ? T[K] : [T[K]]) => void>;
   }

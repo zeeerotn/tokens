@@ -68,8 +68,8 @@ export class Validator {
             resolve({ ...validationResult, key: ValidationEnum.UNGUARDED})
           } else {
             validation.onValidation(value, entity)
-              .then((key) => {
-                resolve({ ...validationResult, key })
+              .then(({ key, name }) => {
+                resolve({ key, name: name || validationResult.name })
               })
           }
         } catch (_error) {

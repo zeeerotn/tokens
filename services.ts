@@ -3,7 +3,7 @@ import Console from '~/common/services/console.service.ts';
 import ConsoleTransport from '~/tracer/transports/console.transport.ts';
 import Decorator from '~/decorator/services/decorator.service.ts';
 import DecoratorMetadata from '~/decorator/services/decorator-metadata.service.ts';
-import Dispatcher from '~/emitter/services/dispatcher.service.ts';
+import Dispatch from '~/dispatcher/services/dispatch.service.ts';
 import Entity from '~/entity/services/entity.service.ts';
 import Exception from '~/common/services/exception.service.ts';
 import Factory from '~/common/services/factory.service.ts';
@@ -25,7 +25,7 @@ export { default as Console } from '~/common/services/console.service.ts';
 export { default as ConsoleTransport } from '~/tracer/transports/console.transport.ts';
 export { default as Decorator } from '~/decorator/services/decorator.service.ts';
 export { default as DecoratorMetadata } from '~/decorator/services/decorator-metadata.service.ts';
-export { default as Dispatcher } from '~/emitter/services/dispatcher.service.ts';
+export { default as Dispatch } from '~/dispatcher/services/dispatch.service.ts';
 export { default as Entity } from '~/entity/services/entity.service.ts';
 export { default as Exception } from '~/common/services/exception.service.ts';
 export { default as Factory } from '~/common/services/factory.service.ts';
@@ -48,7 +48,7 @@ export default {
   ConsoleTransport,
   Decorator,
   DecoratorMetadata,
-  Dispatcher,
+  Dispatch,
   Entity,
   Exception,
   Factory,

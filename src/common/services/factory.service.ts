@@ -1,5 +1,6 @@
 import type { NewableType, PropertiesType } from '~/common/types.ts';
 import DecoratorMetadata from '~/decorator/services/decorator-metadata.service.ts';
+import NewableAnnotation from '~/common/annotations/newable.annotation.ts';
 
 /**
  * Utility class providing common operations for class instantiation and function parameter inspection
@@ -62,7 +63,15 @@ export class Factory {
     if (canUpdateProperties) {
       Object.entries(namedArguments).reduce((t: any, [key]: any) => {
         if (Object.hasOwnProperty.call(t, key)) {
-          t[key] = namedArguments[key];
+          const value = namedArguments[key];
+          const newableDecoration = DecoratorMetadata.findByAnnotationInteroperableName(target, 'newable', key);
+
+          if (newableDecoration) {
+            const nestedClass = (newableDecoration.annotation.target as NewableAnnotation).type;
+            t[key] = Factory.construct(nestedClass, { properties: value });
+          } else {
+            t[key] = value;
+          }
         }
         return t;
       }, targetInstance);
