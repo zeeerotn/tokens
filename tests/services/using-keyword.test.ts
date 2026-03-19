@@ -5,7 +5,7 @@ import Tracer from '~/tracer/services/tracer.service.ts';
 import QueueService from '~/common/services/queue.service.ts';
 import Timer from '~/common/services/timer.service.ts';
 import Container from '~/container/services/container.service.ts';
-import Dispatcher from '~/emitter/services/dispatcher.service.ts';
+import Signal from '~/messenger/services/signal.service.ts';
 import Packer from '~/packer/services/packer.service.ts';
 import type { TraceType } from '~/tracer/types.ts';
 import type { TransportInterface } from '~/tracer/interfaces.ts';
@@ -151,15 +151,15 @@ describe('using keyword (explicit resource management)', () => {
     });
   });
 
-  describe('Dispatcher with Symbol.dispose', () => {
+  describe('Signal with Symbol.dispose', () => {
     it('should automatically clear listeners when disposed', () => {
-      let dispatcher: Dispatcher<{ test: [string] }>;
+      let dispatcher: Signal<{ test: [string] }>;
       
       {
-        using testDispatcher = new Dispatcher<{ test: [string] }>();
-        dispatcher = testDispatcher;
+        using testSignal = new Signal<{ test: [string] }>();
+        dispatcher = testSignal;
         
-        testDispatcher.subscribe('test', (data) => {
+        testSignal.subscribe('test', (data) => {
           console.log(data);
         });
         
@@ -170,13 +170,13 @@ describe('using keyword (explicit resource management)', () => {
     });
 
     it('should clear listeners even if error occurs', () => {
-      let dispatcher: Dispatcher<{ test: [string] }>;
+      let dispatcher: Signal<{ test: [string] }>;
       
       try {
-        using testDispatcher = new Dispatcher<{ test: [string] }>();
-        dispatcher = testDispatcher;
+        using testSignal = new Signal<{ test: [string] }>();
+        dispatcher = testSignal;
         
-        testDispatcher.subscribe('test', (data) => {
+        testSignal.subscribe('test', (data) => {
           console.log(data);
         });
         
@@ -201,7 +201,7 @@ describe('using keyword (explicit resource management)', () => {
       
       expect(packer!.packs.length).toBe(0);
       expect(packer!.container.instances.size).toBe(0);
-      expect(Object.keys(packer!.dispatcher.listeners).length).toBe(0);
+      expect(Object.keys(packer!.signal.listeners).length).toBe(0);
     });
   });
 
@@ -318,20 +318,20 @@ describe('using keyword (explicit resource management)', () => {
     it('should dispose all resources', () => {
       let timer: Timer;
       let container: Container;
-      let dispatcher: Dispatcher<any>;
+      let dispatcher: Signal<any>;
       
       {
         using testTimer = new Timer();
         using testContainer = new Container();
-        using testDispatcher = new Dispatcher<{ test: [string] }>();
+        using testSignal = new Signal<{ test: [string] }>();
         
         timer = testTimer;
         container = testContainer;
-        dispatcher = testDispatcher;
+        dispatcher = testSignal;
         
         testTimer.setTime('test');
         testContainer.construct('NonExistent');
-        testDispatcher.subscribe('test', () => {});
+        testSignal.subscribe('test', () => {});
         
         expect(timer.timers.size).toBe(1);
       }

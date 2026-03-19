@@ -3,8 +3,8 @@ import { expect } from "@std/expect";
 
 import Redactor from '~/tracer/services/redactor.service.ts';
 import type { TraceType } from '~/tracer/types.ts';
-import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import SpanEnum from '~/tracer/enums/span.enum.ts';
+import StatusEnum from '~/tracer/enums/status.enum.ts';
 
 describe('Redactor', () => {
   describe('Basic Redaction', () => {
@@ -23,8 +23,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -57,8 +57,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -87,8 +87,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -120,8 +120,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -151,8 +151,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -194,8 +194,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -234,8 +234,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [
           {
@@ -282,8 +282,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [
           {
@@ -333,8 +333,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -403,8 +403,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -441,8 +441,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: []
       };
@@ -465,8 +465,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -492,8 +492,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -525,8 +525,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {
@@ -567,8 +567,8 @@ describe('Redactor', () => {
         id: 'trace-1',
         spanId: 'span-1',
         name: 'test',
-        kind: SpanKindEnum.INTERNAL,
-        status: SpanStatusEnum.UNSET,
+        kind: SpanEnum.INTERNAL,
+        status: StatusEnum.UNSET,
         startTime: Date.now(),
         entries: [],
         attributes: {

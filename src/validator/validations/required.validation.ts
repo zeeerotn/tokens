@@ -13,6 +13,7 @@ import isDate from '~/common/guards/is-date.guard.ts';
 import isFunction from '~/common/guards/is-function.guard.ts';
 import isObject from '~/common/guards/is-object.guard.ts';
 import isNumber from '~/common/guards/is-number.guard.ts';
+import { isArray } from '@zeeerotn/tokens/guards';
 
 export class RequiredValidation implements AnnotationInterface, ValidationInterface {
   name: string = 'Required'
@@ -23,7 +24,8 @@ export class RequiredValidation implements AnnotationInterface, ValidationInterf
     isString,
     isNumber,
     isDate,
-    isObject
+    isObject,
+    isArray
   ]
   
   validations? = [
@@ -31,7 +33,8 @@ export class RequiredValidation implements AnnotationInterface, ValidationInterf
     (record: any): boolean => isString(record) && !!record,
     (record: any): boolean => isNumber(record) && !isNaN(record),
     (record: any): boolean => isDate(record) && !isNaN(record.getTime()),
-    (record: any): boolean => isObject(record) && Object.keys(record).length > 0
+    (record: any): boolean => isObject(record) && Object.keys(record).length > 0,
+    (record: any): boolean => isArray(record) && record.length > 0
   ]
 
   constructor(public predicate?: (entity: any) => boolean) {}

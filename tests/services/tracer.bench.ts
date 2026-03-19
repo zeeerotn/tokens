@@ -2,8 +2,8 @@ import type { TraceType } from '~/tracer/types.ts';
 import type { TransportInterface } from '~/tracer/interfaces.ts';
 
 import Tracer from '~/tracer/services/tracer.service.ts';
-import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import SpanEnum from '~/tracer/enums/span.enum.ts';
+import StatusEnum from '~/tracer/enums/status.enum.ts';
 import QueueService from '~/common/services/queue.service.ts';
 import SilentTransport from '../transports/silent.transport.ts';
 
@@ -36,11 +36,11 @@ const tracerNoTransport = new Tracer(emptyQueue, { name: 'bench-no-transport' })
 const tracerWithSilent = new Tracer(benchQueue, { name: 'bench-with-silent' });
 
 async function processSimpleRequest(tracer: Tracer): Promise<{ result: string, span: any }> {
-  const requestSpan = tracer.start({ name: 'request', kind: SpanKindEnum.SERVER });
+  const requestSpan = tracer.start({ name: 'request', kind: SpanEnum.SERVER });
   
   const data = { status: 'ok' };
   
-  requestSpan.status(SpanStatusEnum.RESOLVED);
+  requestSpan.status(StatusEnum.RESOLVED);
   requestSpan.end();
   
   const result = JSON.stringify(data);
@@ -49,39 +49,39 @@ async function processSimpleRequest(tracer: Tracer): Promise<{ result: string, s
 }
 
 async function processRequestWithMiddleware(tracer: Tracer): Promise<{ result: string, span: any }> {
-  const serverSpan = tracer.start({ name: 'server', kind: SpanKindEnum.SERVER });
+  const serverSpan = tracer.start({ name: 'server', kind: SpanEnum.SERVER });
   
-  const handlerSpan = serverSpan.start({ name: 'handler', kind: SpanKindEnum.INTERNAL });
+  const handlerSpan = serverSpan.start({ name: 'handler', kind: SpanEnum.INTERNAL });
   handlerSpan.attributes({ pid: 1234, memory: '50MB' });
   
-  const requestSpan = serverSpan.start({ name: 'request', kind: SpanKindEnum.INTERNAL });
+  const requestSpan = serverSpan.start({ name: 'request', kind: SpanEnum.INTERNAL });
   requestSpan.attributes({ method: 'GET', pathname: '/api/test' });
   requestSpan.info('GET /api/test');
-  requestSpan.status(SpanStatusEnum.RESOLVED);
+  requestSpan.status(StatusEnum.RESOLVED);
   requestSpan.end();
   
-  const middleware1 = serverSpan.start({ name: 'middleware exception', kind: SpanKindEnum.INTERNAL });
-  middleware1.status(SpanStatusEnum.RESOLVED);
+  const middleware1 = serverSpan.start({ name: 'middleware exception', kind: SpanEnum.INTERNAL });
+  middleware1.status(StatusEnum.RESOLVED);
   middleware1.end();
   
-  const middleware2 = serverSpan.start({ name: 'middleware response', kind: SpanKindEnum.INTERNAL });
-  middleware2.status(SpanStatusEnum.RESOLVED);
+  const middleware2 = serverSpan.start({ name: 'middleware response', kind: SpanEnum.INTERNAL });
+  middleware2.status(StatusEnum.RESOLVED);
   middleware2.end();
   
-  const middleware3 = serverSpan.start({ name: 'middleware gateway', kind: SpanKindEnum.INTERNAL });
-  middleware3.status(SpanStatusEnum.RESOLVED);
+  const middleware3 = serverSpan.start({ name: 'middleware gateway', kind: SpanEnum.INTERNAL });
+  middleware3.status(StatusEnum.RESOLVED);
   middleware3.end();
   
-  const responseSpan = serverSpan.start({ name: 'response', kind: SpanKindEnum.INTERNAL });
+  const responseSpan = serverSpan.start({ name: 'response', kind: SpanEnum.INTERNAL });
   responseSpan.info('GET /api/test with 200');
   responseSpan.attributes({ status: 200, statusText: 'OK' });
-  responseSpan.status(SpanStatusEnum.RESOLVED);
+  responseSpan.status(StatusEnum.RESOLVED);
   responseSpan.end();
   
-  handlerSpan.status(SpanStatusEnum.RESOLVED);
+  handlerSpan.status(StatusEnum.RESOLVED);
   handlerSpan.end();
   
-  serverSpan.status(SpanStatusEnum.RESOLVED);
+  serverSpan.status(StatusEnum.RESOLVED);
   serverSpan.end();
   
   const result = JSON.stringify({ status: 'ok' });
@@ -149,7 +149,7 @@ Deno.bench({
   group: 'basic-span',
   baseline: true,
   fn() {
-    const span = tracerNoTransport.start({ name: 'test-span', kind: SpanKindEnum.INTERNAL });
+    const span = tracerNoTransport.start({ name: 'test-span', kind: SpanEnum.INTERNAL });
     span.attributes({ test: 'value' });
     span.end();
   },
@@ -159,7 +159,7 @@ Deno.bench({
   name: 'Basic - SilentTransport - single span',
   group: 'basic-span',
   fn() {
-    const span = tracerWithSilent.start({ name: 'test-span', kind: SpanKindEnum.INTERNAL });
+    const span = tracerWithSilent.start({ name: 'test-span', kind: SpanEnum.INTERNAL });
     span.attributes({ test: 'value' });
     span.end();
   },

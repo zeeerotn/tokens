@@ -8,8 +8,8 @@ import ConsoleTransport from '~/tracer/transports/console.transport.ts'
 import Tracer from '~/tracer/services/tracer.service.ts';
 import HttpTransport from '~/tracer/transports/http.transport.ts'
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
-import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import SpanEnum from '~/tracer/enums/span.enum.ts';
+import StatusEnum from '~/tracer/enums/status.enum.ts';
 import QueueService from '~/common/services/queue.service.ts';
 
 class MockHttpTransport extends HttpTransport {
@@ -147,7 +147,7 @@ describe('Tracer with Console and HTTP Transports', () => {
       const httpData = mockHttpTransport.sentData[0];
       const logs = httpData.entries.filter(e => e.type === 'log');
       expect(logs[0].message).toBe('Error occurred');
-      expect(httpData.status).toBe(SpanStatusEnum.REJECTED);
+      expect(httpData.status).toBe(StatusEnum.REJECTED);
 
       const consoleData = JSON.parse(mockConsoleTransport.logs[0]);
       const consoleLogs = consoleData.entries.filter((e: any) => e.type === 'log');
@@ -157,10 +157,10 @@ describe('Tracer with Console and HTTP Transports', () => {
 
   describe('Single Span Operations', () => {
     it('should create and end a span', async () => {
-      const span = tracer.start({ name: 'test-operation', kind: SpanKindEnum.SERVER });
+      const span = tracer.start({ name: 'test-operation', kind: SpanEnum.SERVER });
       
       expect(span.trace.name).toBe('test-operation');
-      expect(span.trace.kind).toBe(SpanKindEnum.SERVER);
+      expect(span.trace.kind).toBe(SpanEnum.SERVER);
       expect(span.trace.id).toBeTruthy();
       expect(span.trace.spanId).toBeTruthy();
 
@@ -218,13 +218,13 @@ describe('Tracer with Console and HTTP Transports', () => {
     it('should set span status', async () => {
       const span = tracer.start({ name: 'status-test' });
       
-      span.status(SpanStatusEnum.RESOLVED);
+      span.status(StatusEnum.RESOLVED);
       span.end();
       
       await new Promise(resolve => setTimeout(resolve, 100));
 
       const sentData = mockHttpTransport.sentData[0];
-      expect(sentData.status).toBe(SpanStatusEnum.RESOLVED);
+      expect(sentData.status).toBe(StatusEnum.RESOLVED);
     });
 
     it('should handle span errors', async () => {
@@ -241,16 +241,16 @@ describe('Tracer with Console and HTTP Transports', () => {
       const logs = spanData.entries.filter(e => e.type === 'log');
       expect(logs[0].level).toBe(LogLevelEnum.ERROR);
       expect(logs[0].message).toBe('Something went wrong');
-      expect(spanData.status).toBe(SpanStatusEnum.REJECTED);
+      expect(spanData.status).toBe(StatusEnum.REJECTED);
     });
   });
 
   describe('Nested Spans - Two Levels', () => {
     it('should create parent and child spans', async () => {
-      const parent = tracer.start({ name: 'parent-operation', kind: SpanKindEnum.SERVER });
+      const parent = tracer.start({ name: 'parent-operation', kind: SpanEnum.SERVER });
       parent.attributes({ parentAttr: 'parent-value' });
 
-      const child = parent.start({ name: 'child-operation', kind: SpanKindEnum.CLIENT });
+      const child = parent.start({ name: 'child-operation', kind: SpanEnum.CLIENT });
       child.attributes({ childAttr: 'child-value' });
 
       child.end();
@@ -273,8 +273,8 @@ describe('Tracer with Console and HTTP Transports', () => {
 
     it('should maintain trace context across parent-child', async () => {
       const traceId = 'custom-trace-123';
-      const parent = tracer.start({ name: 'parent', traceId, kind: SpanKindEnum.SERVER });
-      const child = parent.start({ name: 'child', kind: SpanKindEnum.INTERNAL });
+      const parent = tracer.start({ name: 'parent', traceId, kind: SpanEnum.SERVER });
+      const child = parent.start({ name: 'child', kind: SpanEnum.INTERNAL });
 
       child.end();
       parent.end();
@@ -321,13 +321,13 @@ describe('Tracer with Console and HTTP Transports', () => {
     it('should create three levels of nested spans', async () => {
       const rootTracer = new Tracer(queue, { name: 'root-tracer'});
 
-      const level1 = rootTracer.start({ name: 'level1-api-request', kind: SpanKindEnum.SERVER });
+      const level1 = rootTracer.start({ name: 'level1-api-request', kind: SpanEnum.SERVER });
       level1.attributes({ endpoint: '/api/users', method: 'GET' });
 
-      const level2 = level1.start({ name: 'level2-business-logic', kind: SpanKindEnum.INTERNAL });
+      const level2 = level1.start({ name: 'level2-business-logic', kind: SpanEnum.INTERNAL });
       level2.attributes({ operation: 'validate-user' });
 
-      const level3 = level2.start({ name: 'level3-database-query', kind: SpanKindEnum.CLIENT });
+      const level3 = level2.start({ name: 'level3-database-query', kind: SpanEnum.CLIENT });
       level3.attributes({ query: 'SELECT * FROM users', db: 'postgres' });
 
       level3.end();
@@ -381,15 +381,15 @@ describe('Tracer with Console and HTTP Transports', () => {
     it('should create multiple children from same parent', async () => {
       const parent = tracer.start({ name: 'parent-with-multiple-children' });
 
-      const child1 = parent.start({ name: 'child1', kind: SpanKindEnum.CLIENT });
+      const child1 = parent.start({ name: 'child1', kind: SpanEnum.CLIENT });
       child1.attributes({ childId: 1 });
       child1.end();
 
-      const child2 = parent.start({ name: 'child2', kind: SpanKindEnum.CLIENT });
+      const child2 = parent.start({ name: 'child2', kind: SpanEnum.CLIENT });
       child2.attributes({ childId: 2 });
       child2.end();
 
-      const child3 = parent.start({ name: 'child3', kind: SpanKindEnum.CLIENT });
+      const child3 = parent.start({ name: 'child3', kind: SpanEnum.CLIENT });
       child3.attributes({ childId: 3 });
       child3.end();
 
@@ -413,17 +413,17 @@ describe('Tracer with Console and HTTP Transports', () => {
     });
 
     it('should handle sibling spans with different kinds', async () => {
-      const parent = tracer.start({ name: 'parent', kind: SpanKindEnum.SERVER });
+      const parent = tracer.start({ name: 'parent', kind: SpanEnum.SERVER });
 
-      const dbSpan = parent.start({ name: 'database-query', kind: SpanKindEnum.CLIENT });
+      const dbSpan = parent.start({ name: 'database-query', kind: SpanEnum.CLIENT });
       dbSpan.attributes({ db: 'postgresql', operation: 'SELECT' });
       dbSpan.end();
 
-      const cacheSpan = parent.start({ name: 'cache-lookup', kind: SpanKindEnum.CLIENT });
+      const cacheSpan = parent.start({ name: 'cache-lookup', kind: SpanEnum.CLIENT });
       cacheSpan.attributes({ cache: 'redis', key: 'user:123' });
       cacheSpan.end();
 
-      const queueSpan = parent.start({ name: 'queue-publish', kind: SpanKindEnum.PRODUCER });
+      const queueSpan = parent.start({ name: 'queue-publish', kind: SpanEnum.PRODUCER });
       queueSpan.attributes({ queue: 'notifications', messageId: 'msg-456' });
       queueSpan.end();
 
@@ -437,15 +437,15 @@ describe('Tracer with Console and HTTP Transports', () => {
       const cacheData = mockHttpTransport.sentData[1];
       const queueData = mockHttpTransport.sentData[2];
 
-      expect(dbData.kind).toBe(SpanKindEnum.CLIENT);
-      expect(cacheData.kind).toBe(SpanKindEnum.CLIENT);
-      expect(queueData.kind).toBe(SpanKindEnum.PRODUCER);
+      expect(dbData.kind).toBe(SpanEnum.CLIENT);
+      expect(cacheData.kind).toBe(SpanEnum.CLIENT);
+      expect(queueData.kind).toBe(SpanEnum.PRODUCER);
     });
   });
 
   describe('Complex Real-World Scenario', () => {
     it('should trace a complete order processing workflow', async () => {
-      const requestSpan = tracer.start({ name: 'http.request', kind: SpanKindEnum.SERVER, traceId: 'trace-order-12345' });
+      const requestSpan = tracer.start({ name: 'http.request', kind: SpanEnum.SERVER, traceId: 'trace-order-12345' });
 
       requestSpan.attributes({
         'http.method': 'POST',
@@ -457,15 +457,15 @@ describe('Tracer with Console and HTTP Transports', () => {
 
       requestSpan.info('Received order request');
 
-      const validateSpan = requestSpan.start({ name: 'order.validate', kind: SpanKindEnum.INTERNAL });
+      const validateSpan = requestSpan.start({ name: 'order.validate', kind: SpanEnum.INTERNAL });
       validateSpan.debug('Validating order data');
       validateSpan.event('validation.started');
       await new Promise(resolve => setTimeout(resolve, 10));
       validateSpan.event('validation.completed');
-      validateSpan.status(SpanStatusEnum.RESOLVED);
+      validateSpan.status(StatusEnum.RESOLVED);
       validateSpan.end();
 
-      const inventorySpan = requestSpan.start({ name: 'inventory.check', kind: SpanKindEnum.CLIENT });
+      const inventorySpan = requestSpan.start({ name: 'inventory.check', kind: SpanEnum.CLIENT });
       inventorySpan.attributes({
         'inventory.sku': 'ITEM-001',
         'inventory.quantity': 5,
@@ -473,7 +473,7 @@ describe('Tracer with Console and HTTP Transports', () => {
       inventorySpan.info('Checking inventory');
       await new Promise(resolve => setTimeout(resolve, 20));
 
-      const inventoryDbSpan = inventorySpan.start({ name: 'inventory.database.query', kind: SpanKindEnum.CLIENT });
+      const inventoryDbSpan = inventorySpan.start({ name: 'inventory.database.query', kind: SpanEnum.CLIENT });
       inventoryDbSpan.attributes({
         'db.system': 'postgresql',
         'db.statement': 'SELECT quantity FROM inventory WHERE sku = $1',
@@ -485,7 +485,7 @@ describe('Tracer with Console and HTTP Transports', () => {
       inventorySpan.event('inventory.available');
       inventorySpan.end();
 
-      const paymentSpan = requestSpan.start({ name: 'payment.process', kind: SpanKindEnum.CLIENT });
+      const paymentSpan = requestSpan.start({ name: 'payment.process', kind: SpanEnum.CLIENT });
       paymentSpan.attributes({
         'payment.provider': 'stripe',
         'payment.amount': 99.99,
@@ -493,10 +493,10 @@ describe('Tracer with Console and HTTP Transports', () => {
       });
       paymentSpan.info('Processing payment');
       paymentSpan.event('payment.authorized');
-      paymentSpan.status(SpanStatusEnum.RESOLVED);
+      paymentSpan.status(StatusEnum.RESOLVED);
       paymentSpan.end();
 
-      const createOrderSpan = requestSpan.start({ name: 'order.create', kind: SpanKindEnum.CLIENT });
+      const createOrderSpan = requestSpan.start({ name: 'order.create', kind: SpanEnum.CLIENT });
       createOrderSpan.attributes({
         'db.system': 'postgresql',
         'db.operation': 'INSERT',
@@ -506,7 +506,7 @@ describe('Tracer with Console and HTTP Transports', () => {
       createOrderSpan.event('order.created');
       createOrderSpan.end();
 
-      const notificationSpan = requestSpan.start({ name: 'notification.send', kind: SpanKindEnum.PRODUCER });
+      const notificationSpan = requestSpan.start({ name: 'notification.send', kind: SpanEnum.PRODUCER });
       notificationSpan.attributes({
         'messaging.system': 'rabbitmq',
         'messaging.destination': 'order.notifications',
@@ -517,7 +517,7 @@ describe('Tracer with Console and HTTP Transports', () => {
       notificationSpan.end();
 
       requestSpan.info('Order processed successfully');
-      requestSpan.status(SpanStatusEnum.RESOLVED);
+      requestSpan.status(StatusEnum.RESOLVED);
       requestSpan.end();
       
       await new Promise(resolve => setTimeout(resolve, 100));

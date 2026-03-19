@@ -1,6 +1,6 @@
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
-import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import SpanEnum from './enums/span.enum.ts';
+import StatusEnum from './enums/status.enum.ts';
 
 export type AttributesType = Record<string, unknown>;
 
@@ -38,8 +38,8 @@ export type TraceType = {
   spanId: string;
   spanParentId?: string;
   name: string;
-  kind: SpanKindEnum;
-  status: SpanStatusEnum;
+  kind: SpanEnum;
+  status: StatusEnum;
 
   startTime: number;
   endTime?: number;
@@ -51,7 +51,7 @@ export type TraceType = {
 
 export type TracerOptionsType = {
   name: string;
-  kind?: SpanKindEnum;
+  kind?: SpanEnum;
   traceId?: string;
   parentId?: string;
   namespaces?: Array<string>;

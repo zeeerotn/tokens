@@ -7,9 +7,9 @@ import type {
 } from '~/tracer/types.ts';
 
 
-import SpanKindEnum from '~/tracer/enums/span-kind.enum.ts';
+import SpanEnum from '../enums/span.enum.ts';
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import StatusEnum from '../enums/status.enum.ts';
 import Generator from '~/tracer/services/generator.service.ts';
 
 export class Tracer implements TracerInterface {
@@ -21,8 +21,8 @@ export class Tracer implements TracerInterface {
       spanId: Generator.randomId(8),
       spanParentId: options.parentId,
       name: options.name,
-      kind: options.kind || SpanKindEnum.INTERNAL,
-      status: SpanStatusEnum.UNSET,
+      kind: options.kind || SpanEnum.INTERNAL,
+      status: StatusEnum.UNSET,
       startTime: Date.now(),
       entries: [],
     };
@@ -41,7 +41,7 @@ export class Tracer implements TracerInterface {
     return childTracer;
   }
 
-  public status(status: SpanStatusEnum): void {
+  public status(status: StatusEnum): void {
     this.trace.status = status;
   }
 
@@ -131,8 +131,8 @@ export class Tracer implements TracerInterface {
     for (const message of messages as Array<string>) {
       this.log(LogLevelEnum.ERROR, message, data, location);
     }
-    if (this.trace.status === SpanStatusEnum.UNSET) {
-      this.trace.status = SpanStatusEnum.REJECTED;
+    if (this.trace.status === StatusEnum.UNSET) {
+      this.trace.status = StatusEnum.REJECTED;
     }
   }
 
@@ -149,7 +149,7 @@ export class Tracer implements TracerInterface {
     for (const message of messages as Array<string>) {
       this.log(LogLevelEnum.FATAL, message, data, location);
     }
-    this.trace.status = SpanStatusEnum.REJECTED;
+    this.trace.status = StatusEnum.REJECTED;
   }
 
   public debug(...messages: Array<string | Record<string, unknown>>): void {

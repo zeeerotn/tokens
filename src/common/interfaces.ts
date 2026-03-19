@@ -11,8 +11,8 @@ import type { JsonType, TimeType } from '~/common/types.ts';
  * @member {JsonType} context - Metadata about the exception
  * @member {string | undefined} stack - Execution stack
  */
-export interface ExceptionInterface<K, C = JsonType> extends Error {
-  key?: K | 'ERROR';
+export interface ExceptionInterface<K = string, C = JsonType> extends Error {
+  key?: K;
   name: string;
   message: string;
   context?: C;

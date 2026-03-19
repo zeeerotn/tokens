@@ -1,6 +1,6 @@
-import type { DispatchInterface } from '~/dispatcher/interfaces.ts';
+import type { SignalInterface } from '~/messenger/interfaces.ts';
 
-export class Dispatch<T> implements DispatchInterface<T> {
+export class Signal<T> implements SignalInterface<T> {
   public listeners: {
     [K in keyof T]?: Array<(...args: T[K] extends any[] ? T[K] : [T[K]]) => void>;
   } = {};
@@ -35,4 +35,4 @@ export class Dispatch<T> implements DispatchInterface<T> {
   }
 }
 
-export default Dispatch
+export default Signal

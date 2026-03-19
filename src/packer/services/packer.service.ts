@@ -1,12 +1,12 @@
 import type { ArtifactType, KeyableType } from '~/common/types.ts';
 import type { ContainerInterface } from '~/container/interfaces.ts';
 import type { PackerInterface } from '~/packer/interfaces.ts';
-import type { DispatchInterface } from '~/dispatcher/interfaces.ts';
+import type { SignalInterface } from '~/messenger/interfaces.ts';
 import type { PackNewableType } from '~/packer/types.ts';
 
 import Container from '~/container/services/container.service.ts';
 import DecoratorMetadata from '~/decorator/services/decorator-metadata.service.ts';
-import Dispatch from '~/dispatcher/services/dispatch.service.ts';
+import Signal from '~/messenger/services/signal.service.ts';
 import PackAnnotation from '~/packer/annotations/pack.annotation.ts';
 import ScopeEnum from '~/container/enums/scope.enum.ts';
 
@@ -14,7 +14,7 @@ import isArtifact from '~/common/guards/is-artifact.guard.ts';
 
 export class Packer implements PackerInterface {
   public packs: Array<KeyableType> = [];
-  public dispatch: DispatchInterface<{ unpacked: [PackNewableType] }> = new Dispatch<
+  public signal: SignalInterface<{ unpacked: [PackNewableType] }> = new Signal<
     { unpacked: [PackNewableType] }
   >();
 
@@ -61,13 +61,13 @@ export class Packer implements PackerInterface {
       }
 
       this.container.add([{ name, target: pack }], 'consumer');
-      this.dispatch.dispatch('unpacked', pack);
+      this.signal.dispatch('unpacked', pack);
     }
   }
 
   [Symbol.dispose](): void {
-    if (Symbol.dispose in this.dispatch) {
-      (this.dispatch as any)[Symbol.dispose]();
+    if (Symbol.dispose in this.signal) {
+      (this.signal as any)[Symbol.dispose]();
     }
     
     if (Symbol.dispose in this.container) {

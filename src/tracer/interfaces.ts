@@ -4,7 +4,7 @@ import type {
   TracerOptionsType,
   TraceType
 } from '~/tracer/types.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import StatusEnum from './enums/status.enum.ts';
 
 export interface RedactorInterface {
   redact(trace: TraceType): TraceType;
@@ -22,7 +22,7 @@ export interface TracerInterface {
 
   start(options: Partial<TracerOptionsType> & { name: string }): TracerInterface;
   
-  status(status: SpanStatusEnum): void;
+  status(status: StatusEnum): void;
   attributes(attributes: AttributesType): void;
   event(name: string, data?: Record<string, unknown>): void;
   

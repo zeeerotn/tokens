@@ -1,7 +1,7 @@
 import type { ContainerInterface } from '~/container/interfaces.ts';
 import type { ArtifactType, KeyableType } from '~/common/types.ts';
 import type { PackNewableType } from '~/packer/types.ts';
-import type { DispatchInterface } from '~/dispatcher/interfaces.ts';
+import type { SignalInterface } from '~/messenger/interfaces.ts';
 
 export interface PackInterface {  
   onBoot?(...args: any[]): Promise<void>
@@ -12,7 +12,7 @@ export interface PackInterface {
 export interface PackerInterface { 
   packs: Array<KeyableType>
   container: ContainerInterface
-  dispatch: DispatchInterface<{ unpacked: [PackNewableType] }>
+  signal: SignalInterface<{ unpacked: [PackNewableType] }>
 
   artifacts(): Array<ArtifactType>
   unpack(pack: PackNewableType): void

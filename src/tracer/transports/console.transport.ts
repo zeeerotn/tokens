@@ -2,7 +2,7 @@ import type { TraceType, TransportOptionsType } from '~/tracer/types.ts';
 import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
 
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
-import SpanStatusEnum from '~/tracer/enums/span-status.enum.ts';
+import StatusEnum from '~/tracer/enums/status.enum.ts';
 import Console from '~/common/services/console.service.ts';
 
 export class ConsoleTransport implements TransportInterface {
@@ -15,9 +15,9 @@ export class ConsoleTransport implements TransportInterface {
   };
 
   public traceColors = {
-    [SpanStatusEnum.UNSET]: Console.yellow.cream,
-    [SpanStatusEnum.RESOLVED]: Console.green.dark,
-    [SpanStatusEnum.REJECTED]: Console.red.dark,
+    [StatusEnum.UNSET]: Console.yellow.cream,
+    [StatusEnum.RESOLVED]: Console.green.dark,
+    [StatusEnum.REJECTED]: Console.red.dark,
   }
 
 constructor(public redactor: RedactorInterface, public options: TransportOptionsType, ) {}
@@ -86,7 +86,7 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
     const duration = Number(data.endTime ? data.endTime - data.startTime : 0).toFixed(3);
 
     let log = console.log;
-    if (data.status === SpanStatusEnum.REJECTED) log = console.error;
+    if (data.status === StatusEnum.REJECTED) log = console.error;
     
     log(`${traceColor}·  TRACE ${String(data.kind).toUpperCase()} ${name} at ${timestamp} took ${duration}ms was ${data.status}${Console.reset}`);
 
