@@ -16,9 +16,9 @@ class IndexedMap<K, V> extends Map<K, V> {
     return true;
   }
 
-  override get(key: K) { return this.map.get(key); }
-  at(index: number) { return this.map.get(this.keyz[index]); }
-  override get size() { return this.keyz.length; }
+  override get(key: K): V | undefined { return this.map.get(key); }
+  at(index: number): V | undefined { return this.map.get(this.keyz[index]); }
+  override get size(): number { return this.keyz.length; }
 
   override values(): MapIterator<V> {
     return this.map.values();
