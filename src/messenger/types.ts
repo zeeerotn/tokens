@@ -1,4 +1,4 @@
-import type { RequireAtLeastOne } from '@zeeerotn/tokens';
+import { RequireAtLeastOne } from '~/common/types.ts';
 
 import IntentEnum from '~/messenger/enums/intent.enum.ts';
 import ExchangeEventEnum from '~/messenger/enums/exchange-event.enum.ts';

@@ -13,7 +13,7 @@ import isDate from '~/common/guards/is-date.guard.ts';
 import isFunction from '~/common/guards/is-function.guard.ts';
 import isObject from '~/common/guards/is-object.guard.ts';
 import isNumber from '~/common/guards/is-number.guard.ts';
-import { isArray } from '@zeeerotn/tokens/guards';
+import isArray from '~/common/guards/is-array.guard.ts';
 
 export class RequiredValidation implements AnnotationInterface, ValidationInterface {
   name: string = 'Required'
