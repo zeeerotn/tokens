@@ -1,12 +1,14 @@
 import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
-import type { HttpOptionsType, TraceType, TransportOptionsType } from '~/tracer/types.ts';
+import type { HttpOptionsType, TraceType, TransportSpecsType } from '~/tracer/types.ts';
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
 
 export class HttpTransport implements TransportInterface {
   public url: string;
+  public specs?: TransportSpecsType & HttpOptionsType;
   
-  constructor(url: string, public redactor: RedactorInterface, public options?: TransportOptionsType & HttpOptionsType) {
+  constructor(url: string, public redactor: RedactorInterface, TRANSPORT_SPECS?: TransportSpecsType & HttpOptionsType) {
     this.url = url;
+    this.specs = TRANSPORT_SPECS;
   }
 
   public async send(data: TraceType | TraceType[]): Promise<void> {
@@ -20,34 +22,36 @@ export class HttpTransport implements TransportInterface {
       
       let filteredEntries = [...trace.entries];
       
-      const shouldIncludeLogs = this.options?.log === undefined || this.options.log === true;
+      const shouldIncludeLogs = this.specs?.log === undefined || this.specs.log === true;
       if (!shouldIncludeLogs) {
         filteredEntries = filteredEntries.filter(entry => entry.type !== 'log');
-      } else if (Array.isArray(this.options?.log)) {
+      } else if (Array.isArray(this.specs?.log)) {
         filteredEntries = filteredEntries.filter(entry => 
-          entry.type !== 'log' || (this.options!.log as LogLevelEnum[]).includes(entry.level)
+          entry.type !== 'log' || (this.specs!.log as LogLevelEnum[]).includes(entry.level)
         );
       }
       
-      const shouldIncludeEvents = this.options?.event === undefined || this.options.event === true;
+      const shouldIncludeEvents = this.specs?.event === undefined || this.specs.event === true;
       if (!shouldIncludeEvents) {
         filteredEntries = filteredEntries.filter(entry => entry.type !== 'event');
       }
       
-      const shouldIncludeAttributes = this.options?.attributes === undefined || this.options.attributes === true;
+      const shouldIncludeAttributes = this.specs?.attributes === undefined || this.specs.attributes === true;
       const filteredTrace = shouldIncludeAttributes 
         ? { ...trace, entries: filteredEntries }
         : { ...trace, entries: filteredEntries, attributes: undefined };
 
+      const payload = { ...filteredTrace, timeOrigin: performance.timeOrigin };
+
       try {
         const response = await fetch(this.url, {
-          method: this.options?.method || 'POST',
+          method: this.specs?.method || 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(this.options?.headers || {}),
+            ...(this.specs?.headers || {}),
           },
-          body: JSON.stringify(filteredTrace),
-          signal: this.options?.signal,
+          body: JSON.stringify(payload),
+          signal: this.specs?.signal,
         });
 
         if (!response.ok) {

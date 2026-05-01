@@ -2,7 +2,7 @@ import type { QueueInterface } from '~/common/interfaces.ts';
 import type { TracerInterface, TransportInterface } from '~/tracer/interfaces.ts';
 import type {
   AttributesType,
-  TracerOptionsType,
+  TracerSpecsType,
   TraceType,
 } from '~/tracer/types.ts';
 
@@ -14,28 +14,30 @@ import Generator from '~/tracer/services/generator.service.ts';
 
 export class Tracer implements TracerInterface {
   public trace: TraceType;
+  public specs: TracerSpecsType;
 
-  constructor(public queue: QueueInterface<TraceType, TransportInterface>, public options: TracerOptionsType) {
+  constructor(public queue: QueueInterface<TraceType, TransportInterface>, TRACER_SPECS: TracerSpecsType) {
+    this.specs = TRACER_SPECS;
     this.trace = {
-      id: options.traceId || Generator.randomId(16),
+      id: this.specs.traceId || Generator.randomId(16),
       spanId: Generator.randomId(8),
-      spanParentId: options.parentId,
-      name: options.name,
-      kind: options.kind || SpanEnum.INTERNAL,
+      spanParentId: this.specs.parentId,
+      name: this.specs.name,
+      kind: this.specs.kind || SpanEnum.INTERNAL,
       status: StatusEnum.UNSET,
-      startTime: Date.now(),
+      startTime: performance.now(),
       entries: [],
     };
   }
 
-  public start(options: Partial<TracerOptionsType> & { name: string }): TracerInterface {
+  public start(options: Partial<TracerSpecsType> & { name: string }): TracerInterface {
     const childTracer = new Tracer(this.queue, {
       name: options.name,
       kind: options.kind,
       traceId: options.traceId || this.trace.id,
       parentId: this.trace.spanId,
-      namespaces: options.namespaces || this.options.namespaces,
-      useWorker: options.useWorker ?? this.options.useWorker,
+      namespaces: options.namespaces || this.specs.namespaces,
+      useWorker: options.useWorker ?? this.specs.useWorker,
     });
     
     return childTracer;
@@ -58,7 +60,7 @@ export class Tracer implements TracerInterface {
     this.trace.entries.push({
       type: 'event',
       name,
-      timestamp: Date.now(),
+      timestamp: performance.now(),
       ...(data && { data }),
       ...(location && { location }),
     });
@@ -66,7 +68,7 @@ export class Tracer implements TracerInterface {
 
   public end(): void {
     this.trace.ended = true;
-    this.trace.endTime = Date.now();
+    this.trace.endTime = performance.now();
     
     this.queue.enqueue(this.trace);
   }
@@ -82,7 +84,7 @@ export class Tracer implements TracerInterface {
       type: 'log',
       level,
       message,
-      timestamp: Date.now(),
+      timestamp: performance.now(),
       ...(data && { data }),
       ...(location && { location }),
     });

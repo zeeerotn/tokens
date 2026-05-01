@@ -1,13 +1,17 @@
-import type { TraceType, RedactionRule, RedactorOptionsType } from '~/tracer/types.ts';
+import type { TraceType, RedactionRule, RedactorSpecsType } from '~/tracer/types.ts';
 import type { RedactorInterface } from '~/tracer/interfaces.ts';
 
 export class Redactor implements RedactorInterface {
-  constructor(private options: RedactorOptionsType) {}
+  private specs: RedactorSpecsType;
+
+  constructor(REDACTOR_SPECS: RedactorSpecsType) {
+    this.specs = REDACTOR_SPECS;
+  }
 
   public redact(trace: TraceType): TraceType {
     const redacted = this.safeClone(trace);
     
-    for (const rule of this.options.rules) {
+    for (const rule of this.specs.rules) {
       for (const path of rule.paths) {
         this.applyRedaction(redacted, path, rule);
       }

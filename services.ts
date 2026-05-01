@@ -11,10 +11,12 @@ import HttpTransport from '~/tracer/transports/http.transport.ts';
 import Generator from '~/tracer/services/generator.service.ts';
 import IndexedMap from '~/common/services/indexed-map.service.ts';
 import List from '~/common/services/list.service.ts';
+import LRUMemoryCache from '~/common/services/lru-memory-cache.service.ts';
 import Metadata from '~/common/services/metadata.service.ts';
 import Objector from '~/common/services/objector.service.ts';
 import Packer from '~/packer/services/packer.service.ts';
 import Queue from '~/common/services/queue.service.ts';
+import Random from '~/common/services/random.service.ts';
 import Redactor from '~/tracer/services/redactor.service.ts';
 import Signal from '~/messenger/services/signal.service.ts';
 import Text from '~/common/services/text.service.ts';
@@ -36,10 +38,12 @@ export { default as Generator } from '~/tracer/services/generator.service.ts';
 export { default as HttpTransport } from '~/tracer/transports/http.transport.ts';
 export { default as IndexedMap } from '~/common/services/indexed-map.service.ts';
 export { default as List } from '~/common/services/list.service.ts';
+export { default as LRUMemoryCache } from '~/common/services/lru-memory-cache.service.ts';
 export { default as Metadata } from '~/common/services/metadata.service.ts';
 export { default as Objector } from '~/common/services/objector.service.ts';
 export { default as Packer } from '~/packer/services/packer.service.ts';
 export { default as Queue } from '~/common/services/queue.service.ts';
+export { default as Random } from '~/common/services/random.service.ts';
 export { default as Redactor } from '~/tracer/services/redactor.service.ts';
 export { default as Signal } from '~/messenger/services/signal.service.ts';
 export { default as Text } from '~/common/services/text.service.ts';
@@ -62,10 +66,12 @@ export default {
   Generator,
   IndexedMap,
   List,
+  LRUMemoryCache,
   Metadata,
   Objector,
   Packer,
   Queue,
+  Random,
   Redactor,
   Signal,
   Text,

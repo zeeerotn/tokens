@@ -105,6 +105,31 @@ export class Entity implements EntityInterface {
       return targetValidations as MappedPropertiesType<this, ValidationResultType[] | any> | undefined;
     });
   }
+
+  public async validatePropertiesToString(onlyResultWithKeys?: Array<ValidationEnum>, parentKey: string = 'message', entity: EntityInterface = this): Promise<string> {
+    return this.propertiesToString(parentKey, await this.validateProperties(onlyResultWithKeys, entity))
+  }
+
+  private propertiesToString(parentKey: string, properties?: MappedPropertiesType<this, ValidationResultType[]>): string {
+    if (properties) {
+
+        return Object.entries(properties).reduce((acc: string[], [key, props]: any) => {
+          let k = `${parentKey}`
+          
+          if (Array.isArray(props)) {
+            k += `.${key}`;
+            acc.push(`${k}: ${props.map((validation: ValidationResultType) => `${validation.name}`).join(', ')}`);
+          } else {
+            k += `.${key}`;
+            acc.push(this.propertiesToString(k, props));
+          }
+
+          return acc;
+        }, []).join('; ');
+      }
+
+      return '';
+  }
 }
 
 export default Entity

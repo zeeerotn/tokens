@@ -10,7 +10,7 @@ export type RedactionRule = {
   replacement?: string;
 };
 
-export type RedactorOptionsType = {
+export type RedactorSpecsType = {
   rules: RedactionRule[];
 };
 
@@ -49,7 +49,7 @@ export type TraceType = {
   attributes?: AttributesType;
 };
 
-export type TracerOptionsType = {
+export type TracerSpecsType = {
   name: string;
   kind?: SpanEnum;
   traceId?: string;
@@ -85,7 +85,7 @@ export type ShutdownMessageType = {
 
 export type WorkerMessageType = InitMessageType | SendMessageType | BatchMessageType | ShutdownMessageType;
 
-export type TransportOptionsType = {
+export type TransportSpecsType = {
   log?: Array<LogLevelEnum> | boolean;
   event?: boolean;
   attributes?: boolean;

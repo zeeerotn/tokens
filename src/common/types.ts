@@ -160,4 +160,12 @@ export type QueueOptionsType<T, P> = {
   processorFn: (batch: T[], processors: P[]) => void | Promise<void>;
 };
 
+export type CacheEntryType<K, V> = {
+  key: K;
+  value: V;
+  expires: number;
+  next: CacheEntryType<K, V> | null;
+  prev: CacheEntryType<K, V> | null;
+};
+
 export default {};

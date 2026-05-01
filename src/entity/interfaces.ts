@@ -29,6 +29,8 @@ export interface EntityInterface {
 
   validateProperty<K extends keyof OmitType<this, FunctionType>>(propertyKey: K, onlyResultWithKeys?: Array<ValidationEnum>, entity?: EntityInterface): Promise<Array<ValidationResultType> | any>;
   validateProperties(onlyResultWithKeys?: Array<ValidationEnum>, entity?: EntityInterface): Promise<MappedPropertiesType<this, ValidationResultType[] | any> | undefined>
+
+  validatePropertiesToString(onlyResultWithKeys?: Array<ValidationEnum>, parentKey?: string, entity?: EntityInterface): Promise<string>
 }
 
 export default {};

@@ -1,8 +1,8 @@
 import type {
   AttributesType,
-  TransportOptionsType,
-  TracerOptionsType,
-  TraceType
+  TracerSpecsType,
+  TraceType,
+  TransportSpecsType
 } from '~/tracer/types.ts';
 import StatusEnum from './enums/status.enum.ts';
 
@@ -11,16 +11,16 @@ export interface RedactorInterface {
 }
 
 export interface TransportInterface {
+  specs?: TransportSpecsType
   redactor: RedactorInterface
-  options?: TransportOptionsType
   send(data: TraceType | TraceType[]): Promise<void>;
 }
 
 export interface TracerInterface {
   trace: TraceType
-  options: TracerOptionsType
+  specs: TracerSpecsType
 
-  start(options: Partial<TracerOptionsType> & { name: string }): TracerInterface;
+  start(options: Partial<TracerSpecsType> & { name: string }): TracerInterface;
   
   status(status: StatusEnum): void;
   attributes(attributes: AttributesType): void;

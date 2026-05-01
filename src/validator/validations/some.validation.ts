@@ -25,11 +25,7 @@ export class SomeValidation implements AnnotationInterface, ValidationInterface 
   validations? = [
     (record: any, _comparison: any): boolean => isNull(record),
     (record: any, _comparison: any): boolean => isUndefined(record),
-    (record: any, comparison: any): boolean => {
-      console.log(record, comparison, comparison.some((v: any) => v === record),)
-      return isNumber(record) && isArray(comparison) && comparison.some((v: any) => v === record)
-    },
-    (record: any, comparison: any): boolean => isString(record) && isArray(comparison) && comparison.some((v: any) => v === record),
+    (record: any, comparison: any): boolean =>  isArray(comparison) && comparison.some((v: any) => v === record),
   ]
 
   constructor(public comparison: (string | number)[]) {}

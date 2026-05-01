@@ -61,4 +61,10 @@ export interface QueueInterface<T, P> {
   stop(): void
 }
 
+export interface CacheInterface<K, V> {
+  get(key: K): V | undefined;
+  set(key: K, value: V): void;
+  fetch(key: K, factory: () => V): V;
+}
+
 export default {};

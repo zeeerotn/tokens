@@ -1,4 +1,4 @@
-import type { TraceType, TransportOptionsType } from '~/tracer/types.ts';
+import type { TraceType, TransportSpecsType } from '~/tracer/types.ts';
 import type { TransportInterface, RedactorInterface } from '~/tracer/interfaces.ts';
 
 import LogLevelEnum from '~/tracer/enums/log-level.enum.ts';
@@ -6,6 +6,8 @@ import StatusEnum from '~/tracer/enums/status.enum.ts';
 import Console from '~/common/services/console.service.ts';
 
 export class ConsoleTransport implements TransportInterface {
+  public specs?: TransportSpecsType;
+
   public logColors = {
     [LogLevelEnum.ERROR]: Console.red.dark,
     [LogLevelEnum.FATAL]: Console.red.medium,
@@ -20,7 +22,9 @@ export class ConsoleTransport implements TransportInterface {
     [StatusEnum.REJECTED]: Console.red.dark,
   }
 
-constructor(public redactor: RedactorInterface, public options: TransportOptionsType, ) {}
+constructor(public redactor: RedactorInterface, TRANSPORT_SPECS?: TransportSpecsType) {
+  this.specs = TRANSPORT_SPECS;
+}
 
   public send(data: TraceType | TraceType[]): Promise<void> {
     const traces = Array.isArray(data) ? data : [data];
@@ -33,26 +37,26 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
       
       let filteredEntries = [...trace.entries];
       
-      const shouldIncludeLogs = this.options?.log === undefined || this.options.log === true;
+      const shouldIncludeLogs = this.specs?.log === undefined || this.specs.log === true;
       if (!shouldIncludeLogs) {
         filteredEntries = filteredEntries.filter(entry => entry.type !== 'log');
-      } else if (Array.isArray(this.options?.log)) {
+      } else if (Array.isArray(this.specs?.log)) {
         filteredEntries = filteredEntries.filter(entry => 
-          entry.type !== 'log' || (this.options.log as LogLevelEnum[]).includes(entry.level)
+          entry.type !== 'log' || (this.specs?.log as LogLevelEnum[]).includes(entry.level)
         );
       }
       
-      const shouldIncludeEvents = this.options?.event === undefined || this.options.event === true;
+      const shouldIncludeEvents = this.specs?.event === undefined || this.specs.event === true;
       if (!shouldIncludeEvents) {
         filteredEntries = filteredEntries.filter(entry => entry.type !== 'event');
       }
       
-      const shouldIncludeAttributes = this.options?.attributes === undefined || this.options.attributes === true;
+      const shouldIncludeAttributes = this.specs?.attributes === undefined || this.specs.attributes === true;
       const filteredTrace = shouldIncludeAttributes 
         ? { ...trace, entries: filteredEntries }
         : { ...trace, entries: filteredEntries, attributes: undefined };
 
-      if (this.options?.pretty) {
+      if (this.specs?.pretty) {
         this.prettyPrint(filteredTrace);
       } else {
         console.log(JSON.stringify(filteredTrace));
@@ -63,7 +67,7 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
   }
 
   private timestampToFullDateString(timestamp: number): string {
-    const date = new Date(timestamp);
+    const date = new Date(performance.timeOrigin + timestamp);
     const year = date.getUTCFullYear();
     const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
     const day = date.getUTCDate().toString().padStart(2, '0');
@@ -71,7 +75,7 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
   }
 
   private timestampToTimeString(timestamp: number): string {
-    const date = new Date(timestamp);
+    const date = new Date(performance.timeOrigin + timestamp);
     const hours = date.getUTCHours().toString().padStart(2, '0');
     const minutes = date.getUTCMinutes().toString().padStart(2, '0');
     const seconds = date.getUTCSeconds().toString().padStart(2, '0');
@@ -79,16 +83,37 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
     return `${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
 
+  private formatDuration(ms: number): string {
+    if (ms < 0) ms = 0;
+
+    if (ms < 0.001) { // less than 1µs
+      return `${parseFloat((ms * 1000).toFixed(3))} µs`;
+    }
+    if (ms < 1000) {
+      return `${parseFloat(ms.toFixed(3))} ms`;
+    }
+    const seconds = ms / 1000;
+    if (seconds < 60) {
+      return `${parseFloat(seconds.toFixed(3))} s`;
+    }
+    const minutes = seconds / 60;
+    if (minutes < 60) {
+      return `${parseFloat(minutes.toFixed(3))} m`;
+    }
+    const hours = minutes / 60;
+    return `${parseFloat(hours.toFixed(3))} h`;
+  }
+
   private prettyPrint(data: TraceType): void {
     const name = data.name.toUpperCase();
     const traceColor = this.traceColors[data.status]
     const timestamp = this.timestampToFullDateString(data.startTime);
-    const duration = Number(data.endTime ? data.endTime - data.startTime : 0).toFixed(3);
+    const duration = this.formatDuration(data.endTime ? data.endTime - data.startTime : 0);
 
     let log = console.log;
     if (data.status === StatusEnum.REJECTED) log = console.error;
     
-    log(`${traceColor}·  TRACE ${String(data.kind).toUpperCase()} ${name} at ${timestamp} took ${duration}ms was ${data.status}${Console.reset}`);
+    log(`${traceColor}·  TRACE ${String(data.kind).toUpperCase()} ${name} at ${timestamp} took ${duration} was ${data.status}${Console.reset}`);
 
     const items: Array<{ type: 'span' | 'attrs' | 'entry', timestamp: number, data: any }> = [];
 
@@ -143,4 +168,3 @@ constructor(public redactor: RedactorInterface, public options: TransportOptions
 }
 
 export default ConsoleTransport
-
